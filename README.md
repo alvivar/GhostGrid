@@ -8,4 +8,4 @@ Lightweight grid component with auto snapping for the current transform and his 
 - Alt + D = Disable all grids
 
 
-> by [Andrés Villalobos](http://twitter.com/matnesis) 
+By [Andrés Villalobos](http://twitter.com/matnesis) 
