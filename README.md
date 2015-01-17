@@ -1,4 +1,4 @@
-###GhostGrid v0.1
+###GhostGrid v0.1 alpha
 
 
 Lightweight grid component with auto snapping for the current transform and his children.
