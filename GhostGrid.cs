@@ -84,8 +84,8 @@ public class GhostGrid : MonoBehaviour
 
 #if UNITY_EDITOR
     /// <summary>
-    /// Menu item to snap all to the grids.
-    /// Shortcut: Shift + S
+    /// Menu item to snap all game objects in the selected grid.
+    /// Shortcut: ALT + S
     /// </summary>
     [MenuItem("Jam Tools/GhostGrid/Snap grid &s")]
     private static void SnapSelectedGrid()
@@ -116,7 +116,7 @@ public class GhostGrid : MonoBehaviour
     
     
     /// <summary>
-    /// Menu item to enable the grid for the selected transform.
+    /// Menu item to enable auto snap for the selected grid.
     /// </summary>
     [MenuItem("Jam Tools/GhostGrid/Enable grid autosnap &a")]
     private static void EnableGridAutosnap()

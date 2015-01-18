@@ -3,9 +3,9 @@
 
 Lightweight grid component with auto snapping for the current transform and his children.
 
-- Alt + A = Enable grid for selected transform
-- Alt + S = Snap everything
-- Alt + D = Disable all grids
+- ALT + S = Snap all game objects in the selected grid
+- ALT + A = Enable auto snap for the selected grid
+- ALT + D = Disable all grids
 
 
 Created by [Andrés Villalobos](http://twitter.com/matnesis).
