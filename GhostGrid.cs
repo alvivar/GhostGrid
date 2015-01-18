@@ -17,6 +17,7 @@ using UnityEditor;
 public class GhostGrid : MonoBehaviour
 {
     public float gridSize = 1f;
+    public int quantity = 0;
 
     [HideInInspector]
     public bool autoSnapEnabled = false;
@@ -66,8 +67,9 @@ public class GhostGrid : MonoBehaviour
         if (gridSize > 0)
         {
             children = GetComponentsInChildren<Transform>();
+            quantity = children.Length;
 
-            for (int i = 0; i < children.Length; i++)
+            for (int i = 0; i < quantity; i++)
             {
                 Vector3 pos = children[i].position;
                 Vector3 snapped = new Vector3(
@@ -82,17 +84,49 @@ public class GhostGrid : MonoBehaviour
 
 #if UNITY_EDITOR
     /// <summary>
-    /// Menu item to enable the grid for the selected transform.
+    /// Menu item to snap all to the grids.
+    /// Shortcut: Shift + S
     /// </summary>
-    [MenuItem("Jam Tools/GhostGrid/Enable autosnap &a")]
-    private static void LogSelectedTransformName()
+    [MenuItem("Jam Tools/GhostGrid/Snap grid &s")]
+    private static void SnapSelectedGrid()
     {
         GhostGrid grid = Selection.activeTransform.GetComponentInParent<GhostGrid>();
 
         if (grid != null)
         {
-            grid.autoSnapEnabled = true;
             grid.SnapAll();
+
+            Debug.Log("GhostGrid :: Grid snapped!");
+        }
+        else
+        {
+            Debug.Log("GhostGrid :: Selected grid doesn't know GhostGrid. Just add the component!");
+        }
+    }
+
+
+    /// <summary>
+    /// Disable the previous menu item if no transform is selected.
+    /// </summary>
+    [MenuItem("Jam Tools/GhostGrid/Snap grid &s", true)]
+    private static bool ValidateSnapSelectedGrid()
+    {
+        return Selection.activeTransform != null;
+    }
+    
+    
+    /// <summary>
+    /// Menu item to enable the grid for the selected transform.
+    /// </summary>
+    [MenuItem("Jam Tools/GhostGrid/Enable grid autosnap &a")]
+    private static void EnableGridAutosnap()
+    {
+        GhostGrid grid = Selection.activeTransform.GetComponentInParent<GhostGrid>();
+
+        if (grid != null)
+        {
+            grid.SnapAll();
+            grid.autoSnapEnabled = true;
 
             Debug.Log("GhostGrid :: Grid enabled for selected transform!");
         }
@@ -106,29 +140,10 @@ public class GhostGrid : MonoBehaviour
     /// <summary>
     /// Disable the previous menu item if no transform is selected.
     /// </summary>
-    [MenuItem("Jam Tools/GhostGrid/Enable autosnap &a", true)]
-    private static bool ValidateLogSelectedTransformName()
+    [MenuItem("Jam Tools/GhostGrid/Enable grid autosnap &a", true)]
+    private static bool ValidateEnableGridAutosnap()
     {
         return Selection.activeTransform != null;
-    }
-
-
-    /// <summary>
-    /// Menu item to snap all to the grids.
-    /// Shortcut: Shift + S
-    /// </summary>
-    [MenuItem("Jam Tools/GhostGrid/Snap everything &s")]
-    private static void SnapEverything()
-    {
-        Debug.Log("GhostGrid :: Everything was snapped!");
-
-        if (brothers == null)
-            return;
-
-        for (int i = 0; i < brothers.Count; i++)
-        {
-            brothers[i].SnapAll();
-        }
     }
 
 
