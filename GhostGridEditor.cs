@@ -47,7 +47,7 @@ public class GhostGridEditor : Editor
         GUILayout.EndHorizontal();
 
         // Status label
-        GUILayout.Label(grid.autoSnapEnabled ? "Auto Snap Activated!" : "Stopped.");
+        GUILayout.Label(grid.autoSnapEnabled ? "Auto Snap Running!" : "Stopped.");
     }
 }
 #endif
