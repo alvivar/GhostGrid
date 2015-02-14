@@ -23,9 +23,6 @@ using UnityEditor;
 /// <summary>
 /// Lightweight grid component with auto snapping. Just add 'GhostGrid.cs' to any
 /// transform to activate the grid for him and his children.
-/// ALT + S = Snap all game objects in the grid for the selected transform
-/// ALT + A = Enable auto snap in the grid for the selected grid
-/// ALT + D = Disable all running grids
 /// </summary>
 [ExecuteInEditMode]
 public class GhostGrid : MonoBehaviour
