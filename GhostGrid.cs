@@ -1,4 +1,18 @@
-﻿using System.Collections.Generic;
+﻿// GhostGrid v0.1 alpha
+
+// Lightweight grid component with auto snapping. Just add 'GhostGrid.cs' to any
+// transform to activate the grid for him and his children.
+
+// - ALT + S = Snap all game objects in the grid for the selected transform
+// - ALT + A = Enable auto snap in the grid for the selected grid
+// - ALT + D = Disable all running grids
+
+
+// Created by Andrés Villalobos [andresalvivar@gmail.com] [twitter.com/matnesis]
+// 07/01/2015 3:21 am
+
+
+using System.Collections.Generic;
 using UnityEngine;
 
 #if UNITY_EDITOR
