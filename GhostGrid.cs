@@ -111,7 +111,7 @@ public class GhostGrid : MonoBehaviour
         }
         else
         {
-            Debug.Log("GhostGrid :: Selected transform doesn't know GhostGrid. Just add the component!");
+            Debug.Log("GhostGrid :: Selected transform doesn't know GhostGrid. (Add the component!)");
         }
     }
 
@@ -140,11 +140,11 @@ public class GhostGrid : MonoBehaviour
             grid.SnapAll();
             grid.autoSnapEnabled = true;
 
-            Debug.Log("GhostGrid :: Grid enabled for the selected transform!");
+            Debug.Log("GhostGrid :: Grid auto snap enabled!");
         }
         else
         {
-            Debug.Log("GhostGrid :: Selected transform doesn't know GhostGrid.");
+            Debug.Log("GhostGrid :: Selected transform doesn't know GhostGrid. (Add the component!)");
         }
     }
 
