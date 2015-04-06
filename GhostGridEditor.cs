@@ -9,7 +9,7 @@ using UnityEngine;
 [CustomEditor(typeof(GhostGrid))]
 public class GhostGridEditor : Editor
 {
-    private GhostGrid grid = null;
+    private GhostGrid grid;
 
 
     public void OnEnable()
