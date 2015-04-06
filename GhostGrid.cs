@@ -51,7 +51,7 @@ public class GhostGrid : MonoBehaviour
     }
 
 
-    public void OnEnable()
+    void OnEnable()
     {
         // Save the reference for menu items maneuvers
         if (brothers == null)
@@ -62,9 +62,9 @@ public class GhostGrid : MonoBehaviour
     }
 
 
-    public void OnDisable()
+    void OnDisable()
     {
-        // Clean up
+        // Remove yourself from the list
         if (brothers.Contains(this))
             brothers.Remove(this);
     }
@@ -107,7 +107,7 @@ public class GhostGrid : MonoBehaviour
         {
             grid.SnapAll();
 
-            Debug.Log("GhostGrid :: Grid snapped!");
+            Debug.Log("GhostGrid :: " + grid.quantity + " elements snapped!");
         }
         else
         {
@@ -166,7 +166,7 @@ public class GhostGrid : MonoBehaviour
     [MenuItem("GhostGrid/Disable All Grids &d")]
     private static void DisableAllGrids()
     {
-        Debug.Log("GhostGrid :: All grids disabled.");
+        Debug.Log("GhostGrid :: Auto snap disabled for all grids.");
 
         if (brothers == null)
             return;
