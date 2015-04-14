@@ -98,7 +98,7 @@ public class GhostGrid : MonoBehaviour
     /// Menu item to snap all game objects in the grid for the selected transform.
     /// Shortcut: ALT + S
     /// </summary>
-    [MenuItem("GhostGrid/Snap Grid &s")]
+    [MenuItem("Tools/GhostGrid/Snap Grid &s")]
     private static void SnapSelectedGrid()
     {
         GhostGrid grid = Selection.activeTransform.GetComponentInParent<GhostGrid>();
@@ -119,7 +119,7 @@ public class GhostGrid : MonoBehaviour
     /// <summary>
     /// Disable the previous menu item if no transform is selected.
     /// </summary>
-    [MenuItem("GhostGrid/Snap Grid &s", true)]
+    [MenuItem("Tools/GhostGrid/Snap Grid &s", true)]
     private static bool ValidateSnapSelectedGrid()
     {
         return Selection.activeTransform != null;
@@ -130,7 +130,7 @@ public class GhostGrid : MonoBehaviour
     /// Menu item to enable auto snap in the grid for the selected transform.
     /// Shortcut: ALT + A
     /// </summary>
-    [MenuItem("GhostGrid/Enable Grid Auto Snap &a")]
+    [MenuItem("Tools/GhostGrid/Enable Grid Auto Snap &a")]
     private static void EnableGridAutoSnap()
     {
         GhostGrid grid = Selection.activeTransform.GetComponentInParent<GhostGrid>();
@@ -152,7 +152,7 @@ public class GhostGrid : MonoBehaviour
     /// <summary>
     /// Disable the previous menu item if no transform is selected.
     /// </summary>
-    [MenuItem("GhostGrid/Enable Grid Auto Snap &a", true)]
+    [MenuItem("Tools/GhostGrid/Enable Grid Auto Snap &a", true)]
     private static bool ValidateEnableGridAutoSnap()
     {
         return Selection.activeTransform != null;
@@ -163,7 +163,7 @@ public class GhostGrid : MonoBehaviour
     /// Menu item to disable all running grids.
     /// Shortcut: ALT + D
     /// </summary>
-    [MenuItem("GhostGrid/Disable All Grids &d")]
+    [MenuItem("Tools/GhostGrid/Disable All Grids &d")]
     private static void DisableAllGrids()
     {
         Debug.Log("GhostGrid :: Auto snap disabled for all grids.");
