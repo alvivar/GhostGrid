@@ -82,14 +82,26 @@ public class GhostGrid : MonoBehaviour
 
             for (int i = 0; i < quantity; i++)
             {
-                Vector3 pos = children[i].position;
-                Vector3 snapped = new Vector3(
-                    Mathf.Round(pos.x / gridSize) * gridSize,
-                    Mathf.Round(pos.y / gridSize) * gridSize,
-                    Mathf.Round(pos.z / gridSize) * gridSize);
-                children[i].position = snapped;
+                SnapTransform(children[i], gridSize);
             }
         }
+    }
+
+
+    /// <summary>
+    /// Snaps a transform into a virtual grid.
+    /// Returns the new position.
+    /// </summary>
+    public static Vector3 SnapTransform(Transform t, float gridSize)
+    {
+        Vector3 pos = t.position;
+        Vector3 snapped = new Vector3(
+            Mathf.Round(pos.x / gridSize) * gridSize,
+            Mathf.Round(pos.y / gridSize) * gridSize,
+            Mathf.Round(pos.z / gridSize) * gridSize);
+        t.position = snapped;
+
+        return snapped;
     }
 
 
