@@ -34,9 +34,10 @@ public class GhostGrid : MonoBehaviour
     public bool autoSnapEnabled = false;
     private Transform[] children = null;
 
-    private static List<GhostGrid> brothers = null;
+    private static List<GhostGrid> others = null;
 
 
+#if UNITY_EDITOR
     void Update()
     {
         if (autoSnapEnabled == false)
@@ -49,24 +50,25 @@ public class GhostGrid : MonoBehaviour
         // Mouse up
         SnapAll();
     }
+#endif
 
 
     void OnEnable()
     {
         // Save the reference for menu items maneuvers
-        if (brothers == null)
-            brothers = new List<GhostGrid>();
+        if (others == null)
+            others = new List<GhostGrid>();
 
-        if (brothers.Contains(this) == false)
-            brothers.Add(this);
+        if (others.Contains(this) == false)
+            others.Add(this);
     }
 
 
     void OnDisable()
     {
         // Remove yourself from the list
-        if (brothers.Contains(this))
-            brothers.Remove(this);
+        if (others.Contains(this))
+            others.Remove(this);
     }
 
 
@@ -176,12 +178,12 @@ public class GhostGrid : MonoBehaviour
     {
         Debug.Log("GhostGrid :: Auto snap disabled for all grids.");
 
-        if (brothers == null)
+        if (others == null)
             return;
 
-        for (int i = 0; i < brothers.Count; i++)
+        for (int i = 0; i < others.Count; i++)
         {
-            brothers[i].autoSnapEnabled = false;
+            others[i].autoSnapEnabled = false;
         }
     }
 #endif
