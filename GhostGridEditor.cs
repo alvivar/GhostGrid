@@ -22,6 +22,7 @@ public class GhostGridEditor : Editor
     {
         DrawDefaultInspector();
 
+
         // Auto snap button
         GUILayout.BeginHorizontal();
         if (GUILayout.Button(grid.autoSnapEnabled ? "Disable Auto Snap" : "Enable Auto Snap", GUILayout.ExpandWidth(false)))
@@ -31,6 +32,7 @@ public class GhostGridEditor : Editor
             if (grid.autoSnapEnabled)
                 grid.SnapAll();
         }
+
 
         // Snap once button
         if (GUILayout.Button("Snap Once", GUILayout.ExpandWidth(false)))
@@ -46,8 +48,14 @@ public class GhostGridEditor : Editor
         }
         GUILayout.EndHorizontal();
 
+
         // Status label
         GUILayout.Label(grid.autoSnapEnabled ? "Auto Snap Running!" : "Stopped.");
+
+
+        // Credits
+        GUILayout.Label("");
+        GUILayout.Label("GhostGrid v0.1");
     }
 }
 #endif
