@@ -104,21 +104,54 @@ public class GhostGrid : MonoBehaviour
     }
 
 
-    public void PurgeOverlappedChildren()
+    /// <summary>
+    /// Changes the parent of all overlapped children (with same position) to
+    /// [GhostGrid:Overlapped] GameObject and returns the excluded count.
+    /// </summary>
+    public int ExcludeOverlappedChildren()
     {
+        List<Transform> safeChildren = new List<Transform>();
+        Transform overlappedParent = this.GetOrCreateTransform("[GhostGrid:Overlapped]");
+
+
+        int excludedCount = 0;
+
         children =  GetComponentsInChildren<Transform>();
         quantity = children.Length;
 
         for (int i = 0; i < quantity; i++)
         {
+            // The first will be the safe forever
+            safeChildren.Add(children[i]);
+
+
             for (int j = 0; j < quantity; j++)
             {
-                if (children[i] != children[j] &&  children[i].position == children[j].position)
+                // Ignore self
+                if (children[i] == children[j])
+                    continue;
+
+
+                // Ignore parents
+                if (children[i] == children[j].parent)
+                    continue;
+
+
+                // Overlapped!
+                if (children[i].position == children[j].position)
                 {
-                    children[j].parent = null;
+                    // Ignore safe children
+                    if (!safeChildren.Contains(children[j]))
+                    {
+                        children[i].parent = overlappedParent;
+                        excludedCount += 1;
+                    }
                 }
             }
         }
+
+
+        return excludedCount;
     }
 
 
@@ -140,7 +173,7 @@ public class GhostGrid : MonoBehaviour
         }
         else
         {
-            Debug.Log("GhostGrid :: Selected transform doesn't know GhostGrid. (Add the component!)");
+            Debug.Log("GhostGrid :: Selected transform (or his parent) doesn't have GhostGrid component.");
         }
     }
 
@@ -173,7 +206,7 @@ public class GhostGrid : MonoBehaviour
         }
         else
         {
-            Debug.Log("GhostGrid :: Selected transform doesn't know GhostGrid. (Add the component!)");
+            Debug.Log("GhostGrid :: Selected transform (or his parent) doesn't have GhostGrid component.");
         }
     }
 
@@ -192,7 +225,7 @@ public class GhostGrid : MonoBehaviour
     /// Menu item to disable all running grids.
     /// Shortcut: ALT + D
     /// </summary>
-    [MenuItem("Tools/GhostGrid/Disable All Grids &d")]
+    [MenuItem("Tools/GhostGrid/Disable Auto Snap In All Grids &d")]
     private static void DisableAllGrids()
     {
         Debug.Log("GhostGrid :: Auto snap disabled for all grids.");
@@ -207,14 +240,31 @@ public class GhostGrid : MonoBehaviour
     }
 
 
-    [MenuItem("Tools/GhostGrid/Purge Overlapped &p")]
+    /// <summary>
+    /// Menu item to exclude overlapped children to [GhostGrid:Overlapped].
+    /// Shortcut: ALT + D
+    /// </summary>
+    [MenuItem("Tools/GhostGrid/Exclude Overlapped")]
     private static void PurgeAll()
     {
-        Debug.Log("GhostGrid :: Purging?");
-
         GhostGrid grid = Selection.activeTransform.GetComponentInParent<GhostGrid>();
 
-        grid.PurgeOverlappedChildren();
+        int howMany = grid.ExcludeOverlappedChildren();
+
+        Debug.Log(
+            "GhostGrid :: All overlapped children " +
+            "(" + howMany + ")" +
+            " moved to [GhostGrid:Overlapped] GameObject.");
+    }
+
+
+    /// <summary>
+    /// Disable the previous menu item if no transform is selected.
+    /// </summary>
+    [MenuItem("Tools/GhostGrid/Exclude Overlapped", true)]
+    private static bool ValidatePurgeAll()
+    {
+        return Selection.activeTransform != null;
     }
 #endif
 }
