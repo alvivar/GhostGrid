@@ -1,4 +1,5 @@
-﻿// GhostGrid v0.1 alpha
+﻿
+// GhostGrid v0.1 alpha
 
 // Lightweight grid component with auto snapping. Just add 'GhostGrid.cs' to any
 // transform to activate the grid for him and his children.
@@ -47,7 +48,7 @@ public class GhostGrid : MonoBehaviour
         if (Application.isPlaying)
             autoSnapEnabled = false;
 
-        // Mouse up
+        // On any changes
         SnapAll();
     }
 #endif
@@ -100,6 +101,24 @@ public class GhostGrid : MonoBehaviour
         vector.z = Mathf.Round(vector.z / gridSize) * gridSize;
 
         return vector;
+    }
+
+
+    public void PurgeOverlappedChildren()
+    {
+        children =  GetComponentsInChildren<Transform>();
+        quantity = children.Length;
+
+        for (int i = 0; i < quantity; i++)
+        {
+            for (int j = 0; j < quantity; j++)
+            {
+                if (children[i] != children[j] &&  children[i].position == children[j].position)
+                {
+                    children[j].parent = null;
+                }
+            }
+        }
     }
 
 
@@ -185,6 +204,17 @@ public class GhostGrid : MonoBehaviour
         {
             others[i].autoSnapEnabled = false;
         }
+    }
+
+
+    [MenuItem("Tools/GhostGrid/Purge Overlapped &p")]
+    private static void PurgeAll()
+    {
+        Debug.Log("GhostGrid :: Purging?");
+
+        GhostGrid grid = Selection.activeTransform.GetComponentInParent<GhostGrid>();
+
+        grid.PurgeOverlappedChildren();
     }
 #endif
 }
