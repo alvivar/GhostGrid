@@ -2,11 +2,9 @@
 
 
 Lightweight grid component with auto snapping. Just add 'GhostGrid.cs' to any
-transform to activate the grid for him and his children.
+GameObject to activate the grid for him and his children.
 
-- ALT + S = Snap all game objects in the grid for the selected transform
-- ALT + A = Enable auto snap in the grid for the selected transform
-- ALT + D = Disable all running grids
+Check out 'Tools/GhostGrid' in the menu for shortcuts.
 
 
 Created by [Andrés Villalobos](http://twitter.com/matnesis).

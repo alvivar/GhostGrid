@@ -4,7 +4,7 @@
 // Lightweight grid component with auto snapping. Just add 'GhostGrid.cs' to
 // any GameObject to activate the grid for him and his children.
 
-// Check out 'Tools/GhostGrid' for shortcuts.
+// Check out 'Tools/GhostGrid' in the menu for shortcuts.
 
 
 // Created by Andrés Villalobos [andresalvivar@gmail.com] [twitter.com/matnesis]
