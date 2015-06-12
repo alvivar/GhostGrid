@@ -1,4 +1,4 @@
-###GhostGrid v0.1 alpha
+###GhostGrid v0.1.3 alpha
 
 
 Lightweight grid component with auto snapping. Just add 'GhostGrid.cs' to any

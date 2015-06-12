@@ -33,7 +33,6 @@ public class GhostGridEditor : Editor
         {
             message = "Grid snapped!";
 
-
             if (grid.autoSnapEnabled)
             {
                 grid.autoSnapEnabled = false;
@@ -50,7 +49,6 @@ public class GhostGridEditor : Editor
         {
             message = "Changed!";
 
-
             grid.autoSnapEnabled = !grid.autoSnapEnabled;
 
             if (grid.autoSnapEnabled)
@@ -64,8 +62,6 @@ public class GhostGridEditor : Editor
         if (GUILayout.Button("Exclude Overlapped", GUILayout.ExpandWidth(false)))
         {
             message = "Exclusion done!";
-            grid.tt().ttAdd(1, () => message = "");
-
 
             grid.ExcludeOverlappedChildren();
         }
@@ -81,7 +77,7 @@ public class GhostGridEditor : Editor
 
         // Credits
         GUILayout.Label("");
-        GUILayout.Label("GhostGrid v0.1.5 by @matnesis");
+        GUILayout.Label("GhostGrid v0.1.3 by @matnesis");
     }
 }
 #endif

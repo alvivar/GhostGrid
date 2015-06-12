@@ -20,8 +20,8 @@ using UnityEditor;
 
 
 /// <summary>
-/// Lightweight grid component with auto snapping. Just add 'GhostGrid.cs' to any
-/// transform to activate the grid for him and his children.
+/// Lightweight grid component with auto snapping. Just add 'GhostGrid.cs' to
+/// any GameObject to activate the grid for him and his children.
 /// </summary>
 [ExecuteInEditMode]
 public class GhostGrid : MonoBehaviour
