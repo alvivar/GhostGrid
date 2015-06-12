@@ -1,12 +1,10 @@
 ﻿
-// GhostGrid v0.1 alpha
+// GhostGrid v0.1.3 alpha
 
-// Lightweight grid component with auto snapping. Just add 'GhostGrid.cs' to any
-// transform to activate the grid for him and his children.
+// Lightweight grid component with auto snapping. Just add 'GhostGrid.cs' to
+// any GameObject to activate the grid for him and his children.
 
-// - ALT + S = Snap all game objects in the grid for the selected transform
-// - ALT + A = Enable auto snap in the grid for the selected grid
-// - ALT + D = Disable all running grids
+// Check out 'Tools/GhostGrid' for shortcuts.
 
 
 // Created by Andrés Villalobos [andresalvivar@gmail.com] [twitter.com/matnesis]
@@ -160,20 +158,21 @@ public class GhostGrid : MonoBehaviour
     /// Menu item to snap all game objects in the grid for the selected transform.
     /// Shortcut: ALT + S
     /// </summary>
-    [MenuItem("Tools/GhostGrid/Snap Grid &s")]
+    [MenuItem("Tools/GhostGrid/Snap Grid Once &s")]
     private static void SnapSelectedGrid()
     {
         GhostGrid grid = Selection.activeTransform.GetComponentInParent<GhostGrid>();
 
         if (grid != null)
         {
+            grid.autoSnapEnabled = false;
             grid.SnapAll();
 
-            Debug.Log("GhostGrid :: " + grid.quantity + " elements snapped!");
+            Debug.Log("GhostGrid :: " + grid.quantity + " elements snapped! Grid auto snap disabled.");
         }
         else
         {
-            Debug.Log("GhostGrid :: Selected transform (or his parent) doesn't have GhostGrid component.");
+            Debug.Log("GhostGrid :: GhostGrid not found on selected transform (or parents).");
         }
     }
 
@@ -181,7 +180,7 @@ public class GhostGrid : MonoBehaviour
     /// <summary>
     /// Disable the previous menu item if no transform is selected.
     /// </summary>
-    [MenuItem("Tools/GhostGrid/Snap Grid &s", true)]
+    [MenuItem("Tools/GhostGrid/Snap Grid Once &s", true)]
     private static bool ValidateSnapSelectedGrid()
     {
         return Selection.activeTransform != null;
@@ -206,7 +205,7 @@ public class GhostGrid : MonoBehaviour
         }
         else
         {
-            Debug.Log("GhostGrid :: Selected transform (or his parent) doesn't have GhostGrid component.");
+            Debug.Log("GhostGrid :: GhostGrid not found on selected transform (or parents).");
         }
     }
 
@@ -249,12 +248,23 @@ public class GhostGrid : MonoBehaviour
     {
         GhostGrid grid = Selection.activeTransform.GetComponentInParent<GhostGrid>();
 
-        int howMany = grid.ExcludeOverlappedChildren();
+        if (grid != null)
+        {
+            int howMany = grid.ExcludeOverlappedChildren();
 
-        Debug.Log(
-            "GhostGrid :: All overlapped children " +
-            "(" + howMany + ")" +
-            " moved to [GhostGrid:Overlapped] GameObject.");
+            if (howMany > 0)
+            {
+                Debug.Log("GhostGrid :: " + howMany + " overlapped children moved to [GhostGrid:Overlapped] GameObject.");
+            }
+            else
+            {
+                Debug.Log("GhostGrid :: The grid is clean! Nothing overlapped.");
+            }
+        }
+        else
+        {
+            Debug.Log("GhostGrid :: GhostGrid not found on selected transform (or parents).");
+        }
     }
 
 
