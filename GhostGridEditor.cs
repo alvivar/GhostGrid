@@ -58,12 +58,24 @@ public class GhostGridEditor : Editor
 
 
         // Exclude overlapped button
+        GUILayout.Label("");
         GUILayout.BeginHorizontal();
-        if (GUILayout.Button("Exclude Overlapped", GUILayout.ExpandWidth(false)))
+        if (GUILayout.Button("Exclude Overlapped Children", GUILayout.ExpandWidth(false)))
         {
             message = "Exclusion done!";
 
             grid.ExcludeOverlappedChildren();
+        }
+        GUILayout.EndHorizontal();
+
+
+        // Optimize colliders button
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("Turn Off Unneeded 2D Colliders", GUILayout.ExpandWidth(false)))
+        {
+            message = "Colliders optimized!";
+
+            grid.TurnOffUnneededColliders2D();
         }
         GUILayout.EndHorizontal();
 
