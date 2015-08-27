@@ -28,6 +28,7 @@ public class GhostGrid : MonoBehaviour
 {
 	public float gridSize = 1f;
 	public int quantity = 0;
+	public LayerMask layer;
 
 	[HideInInspector]
 	public bool autoSnapEnabled = false;
