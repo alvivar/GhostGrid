@@ -4,10 +4,10 @@
 // Lightweight grid component with auto snapping. Just add 'GhostGrid.cs' to
 // any GameObject to activate the grid for him and his children.
 
-// Check out 'Tools/GhostGrid' in the menu for shortcuts.
+// Check out 'Tools/GhostGrid' in the menu for shortcuts and options.
 
 
-// Created by Andrés Villalobos [andresalvivar@gmail.com] [twitter.com/matnesis]
+// Created by Andrés Villalobos ^ andresalvivar@gmail.com ^ twitter.com/matnesis
 // 07/01/2015 3:21 am
 
 
@@ -150,6 +150,10 @@ public class GhostGrid : MonoBehaviour
 		}
 
 
+		// Destroy them
+		DestroyImmediate(overlappedParent.gameObject);
+
+
 		return excludedCount;
 	}
 
@@ -161,13 +165,18 @@ public class GhostGrid : MonoBehaviour
 	/// </summary>
 	public int TurnOffUnneededColliders2D()
 	{
-		// List to collect the unneeded colliders
-		List<Collider2D> unneededColliders = new List<Collider2D>();
-
-
 		// Children colliders
 		Collider2D[] colliders = GetComponentsInChildren<Collider2D>();
 		quantity = colliders.Length;
+
+
+		// Only if there is something in the list
+		if (colliders.Length < 1)
+			return 0;
+
+
+		// List to collect the unneeded colliders
+		List<Collider2D> unneededColliders = new List<Collider2D>();
 
 
 		// First, reactivate all
@@ -175,11 +184,14 @@ public class GhostGrid : MonoBehaviour
 			colliders[i].enabled = true;
 
 
+		// Assuming all colliders have the same size and they are squares
+		float rayLength = colliders[1].bounds.extents.x * 1.1f;
+
+
 		// Then, collect the unneeded colliders by checking around them
 		for (int i = 0; i < quantity; i++)
 		{
 			Vector3 pos = colliders[i].transform.position;
-			float rayLength = Mathf.Max(colliders[i].bounds.extents.x, colliders[i].bounds.extents.y) * 1.1f;
 			int sorroundedCount = 0;
 
 
@@ -213,6 +225,87 @@ public class GhostGrid : MonoBehaviour
 
 
 		return unneededColliders.Count;
+	}
+
+
+	private BoxCollider2D poly;
+
+	public int RebuildPolygon()
+	{
+		if (poly == null)
+			poly = GetComponent<BoxCollider2D>();
+
+
+		// Children colliders
+		Renderer[] colliders = GetComponentsInChildren<Renderer>();
+		quantity = colliders.Length;
+
+
+		// Only if there is something in the list
+		if (colliders.Length < 1)
+			return 0;
+
+
+		// First, reactivate all
+		for (int i = 0; i < quantity; i++)
+			colliders[i].enabled = true;
+
+
+		List<Vector2> newPoints = new List<Vector2>();
+
+
+		// Assuming all colliders have the same size and they are squares
+		float radius = colliders[1].bounds.extents.x;
+		Debug.Log(quantity);
+
+		Bounds b = new Bounds();
+
+		for (int i = 0; i < quantity; i++)
+		{
+			if (colliders[i].transform == transform)
+				continue;
+
+
+			// Vector2 pos = colliders[i].transform.localPosition;
+
+			// Vector2 ul = pos + new Vector2(-radius, radius);
+			// Vector2 ur = pos + new Vector2(radius, radius);
+			// Vector2 dl = pos + new Vector2(-radius, -radius);
+			// Vector2 dr = pos + new Vector2(radius, -radius);
+
+			// if (!newPoints.Contains(ur))
+			// 	newPoints.Add(ur);
+
+			// if (!newPoints.Contains(ul))
+			// 	newPoints.Add(ul);
+
+			// if (!newPoints.Contains(dl))
+			// 	newPoints.Add(dl);
+
+			// if (!newPoints.Contains(dr))
+			// 	newPoints.Add(dr);
+
+
+			Debug.Log(colliders[i].bounds.size);
+			b.Encapsulate(colliders[i].bounds);
+			Debug.Log(b.size);
+			// poly.bounds.Encapsulate(ur);
+			// poly.bounds.Encapsulate(dl);
+			// poly.bounds.Encapsulate(dr);
+		}
+
+		Debug.Log(b.size);
+		// poly.bounds.Encapsulate(b);
+		poly.offset = b.center;
+		poly.size = b.size;
+
+
+		// poly.size = b.size;
+
+		// poly.points = newPoints.ToArray();
+
+
+		return newPoints.Count;
 	}
 
 
@@ -306,7 +399,7 @@ public class GhostGrid : MonoBehaviour
 	/// Menu item to exclude overlapped children to [GhostGrid:Overlapped].
 	/// </summary>
 	[MenuItem("Tools/GhostGrid/Exclude Overlapped Children")]
-	private static void PurgeAll()
+	private static void MenuExcludeOverlappedChildren()
 	{
 		GhostGrid grid = Selection.activeTransform.GetComponentInParent<GhostGrid>();
 
@@ -334,7 +427,7 @@ public class GhostGrid : MonoBehaviour
 	/// Disable the previous menu item if no transform is selected.
 	/// </summary>
 	[MenuItem("Tools/GhostGrid/Exclude Overlapped Children", true)]
-	private static bool ValidatePurgeAll()
+	private static bool ValidateMenuExcludeOverlappedChildren()
 	{
 		return Selection.activeTransform != null;
 	}
@@ -369,6 +462,27 @@ public class GhostGrid : MonoBehaviour
 	/// </summary>
 	[MenuItem("Tools/GhostGrid/Turn Off Unneeded 2D Colliders", true)]
 	private static bool ValidateMenuTurnOffUnneededColliders()
+	{
+		return Selection.activeTransform != null;
+	}
+
+
+	/// <summary>
+	/// Menu item that applies all the optimizations.
+	/// </summary>
+	[MenuItem("Tools/GhostGrid/Apply Both Optimizations")]
+	private static void MenuApplyAllOptimizations()
+	{
+		MenuExcludeOverlappedChildren();
+		MenuTurnOffUnneededColliders();
+	}
+
+
+	/// <summary>
+	/// Disable the previous menu item if no transform is selected.
+	/// </summary>
+	[MenuItem("Tools/GhostGrid/Apply Both Optimizations", true)]
+	private static bool ValidateMenuApplyAllOptimizations()
 	{
 		return Selection.activeTransform != null;
 	}
