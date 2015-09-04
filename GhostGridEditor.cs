@@ -60,9 +60,18 @@ public class GhostGridEditor : Editor
 
         GUILayout.Label("");
         GUILayout.Label("OPTIMIZATIONS");
+
+        // Rename button
         GUILayout.BeginHorizontal();
+        if (GUILayout.Button("Rename children", GUILayout.ExpandWidth(false)))
+        {
+            message = grid.RenameChildren() + " children renamed!";
+        }
+        GUILayout.EndHorizontal();
+
 
         // Exclude overlapped button
+        GUILayout.BeginHorizontal();
         if (GUILayout.Button("Exclude Overlapped Children", GUILayout.ExpandWidth(false)))
         {
             message = grid.ExcludeOverlappedChildren() + " overlapped children deleted!";
@@ -84,6 +93,7 @@ public class GhostGridEditor : Editor
         if (GUILayout.Button("ALL ^", GUILayout.ExpandWidth(false)))
         {
             message =
+                grid.RenameChildren() + " children renamed!" + "\n" +
                 grid.ExcludeOverlappedChildren() + " overlapped children deleted!" + "\n" +
                 grid.TurnOffUnneededColliders2D() + " unneeded colliders were turned off!";
         }

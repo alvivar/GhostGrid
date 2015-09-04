@@ -228,6 +228,29 @@ public class GhostGrid : MonoBehaviour
 	}
 
 
+	/// <summary>
+	/// Rename all children with a particular name and his respective number.
+	/// </summary>
+	public int RenameChildren()
+	{
+
+		children =  GetComponentsInChildren<Transform>();
+		quantity = children.Length;
+
+		for (int i = 0; i < quantity; i++)
+		{
+			// Ignore self
+			if (children[i] == transform)
+				continue;
+
+			// Rename
+			children[i].name = "GG_" + i.ToString().PadLeft(4, '0');
+		}
+
+		return quantity;
+	}
+
+
 	private BoxCollider2D poly;
 
 	public int RebuildPolygon()
