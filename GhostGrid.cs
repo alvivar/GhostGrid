@@ -237,6 +237,8 @@ public class GhostGrid : MonoBehaviour
 		children =  GetComponentsInChildren<Transform>();
 		quantity = children.Length;
 
+		int count = 0;
+
 		for (int i = 0; i < quantity; i++)
 		{
 			// Ignore self
@@ -245,9 +247,10 @@ public class GhostGrid : MonoBehaviour
 
 			// Rename
 			children[i].name = "GG_" + i.ToString().PadLeft(4, '0');
+			count += 1;
 		}
 
-		return quantity;
+		return count;
 	}
 
 
@@ -278,8 +281,8 @@ public class GhostGrid : MonoBehaviour
 
 
 		// Assuming all colliders have the same size and they are squares
-		float radius = colliders[1].bounds.extents.x;
-		Debug.Log(quantity);
+		// float radius = colliders[1].bounds.extents.x;
+		// Debug.Log(quantity);
 
 		Bounds b = new Bounds();
 
