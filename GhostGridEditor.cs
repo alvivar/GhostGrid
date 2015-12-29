@@ -1,16 +1,18 @@
-﻿#if UNITY_EDITOR
+﻿
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
 
 
-/// <summary>
-/// Editor controls for GhostGrid.
-/// </summary>
 [CustomEditor(typeof(GhostGrid))]
 public class GhostGridEditor : Editor
 {
     private GhostGrid grid;
     private string message;
+
+    private bool doRename = false;
+    private bool doCleanOverlappedChildren = false;
+    private bool doTurnOffUnneededColliders2D = false;
 
 
     public void OnEnable()
@@ -26,10 +28,11 @@ public class GhostGridEditor : Editor
         DrawDefaultInspector();
 
         GUILayout.Label("");
-        GUILayout.Label("SNAPPING");
+        GUILayout.Label("Snapping");
         GUILayout.BeginHorizontal();
 
-        // Snap once button
+
+        // Snap Once
         if (GUILayout.Button("Snap Once", GUILayout.ExpandWidth(false)))
         {
             message = "Grid snapped!";
@@ -44,11 +47,10 @@ public class GhostGridEditor : Editor
             }
         }
 
-
-        // Auto snap button
+        // Auto Snap
         if (GUILayout.Button(grid.autoSnapEnabled ? "Disable Auto Snap" : "Enable Auto Snap", GUILayout.ExpandWidth(false)))
         {
-            message = "Changed!";
+            message = "Done!";
 
             grid.autoSnapEnabled = !grid.autoSnapEnabled;
 
@@ -58,53 +60,37 @@ public class GhostGridEditor : Editor
         GUILayout.EndHorizontal();
 
 
+        // Optimizations
         GUILayout.Label("");
-        GUILayout.Label("OPTIMIZATIONS");
+        GUILayout.Label("Optimizations");
 
-        // Rename button
+
+        // ^
+        // Toogle set
+
         GUILayout.BeginHorizontal();
-        if (GUILayout.Button("Rename children", GUILayout.ExpandWidth(false)))
-        {
-            message = grid.RenameChildren() + " children renamed!";
-        }
+        doRename = GUILayout.Toggle(doRename, "Rename children");
         GUILayout.EndHorizontal();
 
-
-        // Exclude overlapped button
         GUILayout.BeginHorizontal();
-        if (GUILayout.Button("Exclude Overlapped Children", GUILayout.ExpandWidth(false)))
-        {
-            message = grid.ExcludeOverlappedChildren() + " overlapped children deleted!";
-        }
+        doCleanOverlappedChildren = GUILayout.Toggle(doCleanOverlappedChildren, "Delete overlapped");
         GUILayout.EndHorizontal();
 
-
-        // Optimize colliders button
         GUILayout.BeginHorizontal();
-        if (GUILayout.Button("Turn Off Unneeded 2D Colliders", GUILayout.ExpandWidth(false)))
-        {
-            message = grid.TurnOffUnneededColliders2D() + " unneeded colliders were turned off!";
-        }
+        doTurnOffUnneededColliders2D = GUILayout.Toggle(doTurnOffUnneededColliders2D, "Turn off unneeded 2D colliders on layer");
         GUILayout.EndHorizontal();
 
-
-        // All optimizations colliders button
         GUILayout.BeginHorizontal();
-        if (GUILayout.Button("ALL ^", GUILayout.ExpandWidth(false)))
+        if (GUILayout.Button("Apply", GUILayout.ExpandWidth(false)))
         {
-            message =
-                grid.RenameChildren() + " children renamed!" + "\n" +
-                grid.ExcludeOverlappedChildren() + " overlapped children deleted!" + "\n" +
-                grid.TurnOffUnneededColliders2D() + " unneeded colliders were turned off!";
-        }
-        GUILayout.EndHorizontal();
+            if (doRename)
+                message = grid.RenameChildren() + " children renamed!";
 
+            if (doCleanOverlappedChildren)
+                message = grid.ExcludeOverlappedChildren() + " overlapped children deleted!";
 
-        GUILayout.Label("");
-        GUILayout.BeginHorizontal();
-        if (GUILayout.Button("#experimental Polygon Builder", GUILayout.ExpandWidth(false)))
-        {
-            message = grid.RebuildPolygon() + "";
+            if (doTurnOffUnneededColliders2D)
+                message = grid.TurnOffUnneededColliders2D() + " unneeded colliders were turned off!";
         }
         GUILayout.EndHorizontal();
 
@@ -112,13 +98,12 @@ public class GhostGridEditor : Editor
         // Status label
         GUILayout.Label("");
         GUILayout.Label(grid.autoSnapEnabled ? "Auto Snap Running!" : "Auto Snap Disabled.");
-        if (message.Length > 0)
-            GUILayout.Label(message);
+        if (message.Length > 0) GUILayout.Label(message);
 
 
         // Credits
         GUILayout.Label("");
-        GUILayout.Label("GhostGrid v0.1.3.5 by @matnesis");
+        GUILayout.Label("GhostGrid v0.1.3.7a by @matnesis");
     }
 }
 #endif

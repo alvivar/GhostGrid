@@ -1,27 +1,25 @@
 ﻿
-// GhostGrid v0.1.3.5 alpha
+// GhostGrid v0.1.3.7 alpha
 
-// Lightweight grid component with auto snapping. Just add 'GhostGrid.cs' to
-// any GameObject to activate the grid for him and his children.
+// Lightweight grid component with auto snapping & some other stuff. Just add
+// 'GhostGrid.cs' to any GameObject to activate the grid for him and his
+// children.
 
-// Check out 'Tools/GhostGrid' in the menu for shortcuts and options.
+// Check out 'Tools/GhostGrid' in the menu for shortcuts and options!
 
 
-// Created by Andrés Villalobos ^ andresalvivar@gmail.com ^ twitter.com/matnesis
+// Andrés Villalobos ´ twitter.com/@matnesis ´ andresalvivar@gmail.com
 // 07/01/2015 3:21 am
 
 
-using System.Collections.Generic;
-using UnityEngine;
-
 #if UNITY_EDITOR
+using UnityEngine;
 using UnityEditor;
-#endif
+using System.Collections.Generic;
 
 
 /// <summary>
-/// Lightweight grid component with auto snapping. Just add 'GhostGrid.cs' to
-/// any GameObject to activate the grid for him and his children.
+/// Lightweight grid component with auto snapping & some other stuff.
 /// </summary>
 [ExecuteInEditMode]
 public class GhostGrid : MonoBehaviour
@@ -37,7 +35,6 @@ public class GhostGrid : MonoBehaviour
 	private static List<GhostGrid> others = null;
 
 
-#if UNITY_EDITOR
 	void Update()
 	{
 		if (autoSnapEnabled == false)
@@ -50,7 +47,6 @@ public class GhostGrid : MonoBehaviour
 		// On any changes
 		SnapAll();
 	}
-#endif
 
 
 	void OnEnable()
@@ -59,7 +55,7 @@ public class GhostGrid : MonoBehaviour
 		if (others == null)
 			others = new List<GhostGrid>();
 
-		if (others.Contains(this) == false)
+		if (!others.Contains(this))
 			others.Add(this);
 	}
 
@@ -69,6 +65,33 @@ public class GhostGrid : MonoBehaviour
 		// Remove yourself from the list
 		if (others.Contains(this))
 			others.Remove(this);
+	}
+
+
+	/// <summary>
+	/// Returns the snap position for the current vector on a simulated virtual grid.
+	/// </summary>
+	public static Vector3 GetSnapVector(Vector3 vector, float gridSize)
+	{
+		vector.x = Mathf.Round(vector.x / gridSize) * gridSize;
+		vector.y = Mathf.Round(vector.y / gridSize) * gridSize;
+		vector.z = Mathf.Round(vector.z / gridSize) * gridSize;
+
+		return vector;
+	}
+
+
+	/// <summary>
+	/// Returns the Transform.
+	/// </summary>
+	public static Transform GetCreateTransform(string name)
+	{
+		GameObject go = GameObject.Find(name);
+
+		if (go == null)
+			go = new GameObject(name);
+
+		return go.transform;
 	}
 
 
@@ -91,26 +114,13 @@ public class GhostGrid : MonoBehaviour
 
 
 	/// <summary>
-	/// Returns the snap position for the current vector on a simulated virtual grid.
-	/// </summary>
-	public static Vector3 GetSnapVector(Vector3 vector, float gridSize)
-	{
-		vector.x = Mathf.Round(vector.x / gridSize) * gridSize;
-		vector.y = Mathf.Round(vector.y / gridSize) * gridSize;
-		vector.z = Mathf.Round(vector.z / gridSize) * gridSize;
-
-		return vector;
-	}
-
-
-	/// <summary>
 	/// Changes the parent of all overlapped children (with same position) to
 	/// [GhostGrid:Overlapped] GameObject and returns the excluded count.
 	/// </summary>
-	public int ExcludeOverlappedChildren()
+	public int ExcludeOverlappedChildren(bool alsoDelete = false)
 	{
 		List<Transform> safeChildren = new List<Transform>();
-		Transform overlappedParent = this.GetOrCreateTransform("[GhostGrid:Overlapped]");
+		Transform overlappedParent = GetCreateTransform("[GhostGrid|Overlapped]");
 
 
 		int excludedCount = 0;
@@ -150,8 +160,8 @@ public class GhostGrid : MonoBehaviour
 		}
 
 
-		// Destroy them
-		DestroyImmediate(overlappedParent.gameObject);
+		if (alsoDelete)
+			DestroyImmediate(overlappedParent.gameObject);
 
 
 		return excludedCount;
@@ -254,88 +264,6 @@ public class GhostGrid : MonoBehaviour
 	}
 
 
-	private BoxCollider2D poly;
-
-	public int RebuildPolygon()
-	{
-		if (poly == null)
-			poly = GetComponent<BoxCollider2D>();
-
-
-		// Children colliders
-		Renderer[] colliders = GetComponentsInChildren<Renderer>();
-		quantity = colliders.Length;
-
-
-		// Only if there is something in the list
-		if (colliders.Length < 1)
-			return 0;
-
-
-		// First, reactivate all
-		for (int i = 0; i < quantity; i++)
-			colliders[i].enabled = true;
-
-
-		List<Vector2> newPoints = new List<Vector2>();
-
-
-		// Assuming all colliders have the same size and they are squares
-		// float radius = colliders[1].bounds.extents.x;
-		// Debug.Log(quantity);
-
-		Bounds b = new Bounds();
-
-		for (int i = 0; i < quantity; i++)
-		{
-			if (colliders[i].transform == transform)
-				continue;
-
-
-			// Vector2 pos = colliders[i].transform.localPosition;
-
-			// Vector2 ul = pos + new Vector2(-radius, radius);
-			// Vector2 ur = pos + new Vector2(radius, radius);
-			// Vector2 dl = pos + new Vector2(-radius, -radius);
-			// Vector2 dr = pos + new Vector2(radius, -radius);
-
-			// if (!newPoints.Contains(ur))
-			// 	newPoints.Add(ur);
-
-			// if (!newPoints.Contains(ul))
-			// 	newPoints.Add(ul);
-
-			// if (!newPoints.Contains(dl))
-			// 	newPoints.Add(dl);
-
-			// if (!newPoints.Contains(dr))
-			// 	newPoints.Add(dr);
-
-
-			Debug.Log(colliders[i].bounds.size);
-			b.Encapsulate(colliders[i].bounds);
-			Debug.Log(b.size);
-			// poly.bounds.Encapsulate(ur);
-			// poly.bounds.Encapsulate(dl);
-			// poly.bounds.Encapsulate(dr);
-		}
-
-		Debug.Log(b.size);
-		// poly.bounds.Encapsulate(b);
-		poly.offset = b.center;
-		poly.size = b.size;
-
-
-		// poly.size = b.size;
-
-		// poly.points = newPoints.ToArray();
-
-
-		return newPoints.Count;
-	}
-
-
-#if UNITY_EDITOR
 	/// <summary>
 	/// Menu item to snap all game objects in the grid for the selected transform.
 	/// Shortcut: ALT + S
@@ -512,5 +440,5 @@ public class GhostGrid : MonoBehaviour
 	{
 		return Selection.activeTransform != null;
 	}
-#endif
 }
+#endif
