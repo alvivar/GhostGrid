@@ -1,14 +1,13 @@
 ﻿
-// GhostGrid v0.1.3.7 alpha
+// GhostGrid v0.1.3.8
 
-// Lightweight grid component with auto snapping & some other stuff. Just add
+// Lightweight grid component with auto snapping & additional magic. Just add
 // 'GhostGrid.cs' to any GameObject to activate the grid for him and his
 // children.
 
-// Check out 'Tools/GhostGrid' in the menu for shortcuts and options!
+// Check out 'Tools/GhostGrid' in the menu for shortcuts!
 
-
-// Andrés Villalobos ´ twitter.com/@matnesis ´ andresalvivar@gmail.com
+// Andrés Villalobos ~ twitter.com/@matnesis ~ andresalvivar@gmail.com
 // 07/01/2015 3:21 am
 
 
@@ -18,31 +17,41 @@ using UnityEditor;
 using System.Collections.Generic;
 
 
-/// <summary>
-/// Lightweight grid component with auto snapping & some other stuff.
-/// </summary>
 [ExecuteInEditMode]
 public class GhostGrid : MonoBehaviour
 {
+	[Header("Config")]
 	public float gridSize = 1f;
-	public int quantity = 0;
-	public LayerMask layer;
 
+	// Data shared with the editor script
 	[HideInInspector]
-	public bool autoSnapEnabled = false;
-	private Transform[] children = null;
+	public int childrenCount = 0;
+	[HideInInspector]
+	public bool doAutoSnap = false;
+	[HideInInspector]
+	public bool doRename = false;
+	[HideInInspector]
+	public bool doCleanOverlappedChildren = false;
+	[HideInInspector]
+	public bool doTurnOffUnneededColliders2D = false;
 
+	private LayerMask layer;
+	private Transform[] children = null;
 	private static List<GhostGrid> others = null;
+
+	private const string NOT_FOUND = "GhostGrid :: GhostGrid not found on selected GameObject (or parents).";
 
 
 	void Update()
 	{
-		if (autoSnapEnabled == false)
+		if (!doAutoSnap)
 			return;
+
 
 		// Stop while playing
 		if (Application.isPlaying)
-			autoSnapEnabled = false;
+			doAutoSnap = false;
+
 
 		// On any changes
 		SnapAll();
@@ -55,6 +64,7 @@ public class GhostGrid : MonoBehaviour
 		if (others == null)
 			others = new List<GhostGrid>();
 
+		// Add yourself
 		if (!others.Contains(this))
 			others.Add(this);
 	}
@@ -62,7 +72,7 @@ public class GhostGrid : MonoBehaviour
 
 	void OnDisable()
 	{
-		// Remove yourself from the list
+		// Remove yourself
 		if (others.Contains(this))
 			others.Remove(this);
 	}
@@ -82,7 +92,7 @@ public class GhostGrid : MonoBehaviour
 
 
 	/// <summary>
-	/// Returns the Transform.
+	/// Returns the Transform with the name.
 	/// </summary>
 	public static Transform GetCreateTransform(string name)
 	{
@@ -103,48 +113,43 @@ public class GhostGrid : MonoBehaviour
 		if (gridSize > 0)
 		{
 			children = GetComponentsInChildren<Transform>();
-			quantity = children.Length;
+			childrenCount = children.Length ;
 
-			for (int i = 0; i < quantity; i++)
-			{
+			for (int i = 0; i < childrenCount; i++)
 				children[i].position = GetSnapVector(children[i].position, gridSize);
-			}
 		}
 	}
 
 
 	/// <summary>
 	/// Changes the parent of all overlapped children (with same position) to
-	/// [GhostGrid:Overlapped] GameObject and returns the excluded count.
+	/// [GhostGrid|Overlapped] and returns the excluded count.
 	/// </summary>
-	public int ExcludeOverlappedChildren(bool alsoDelete = false)
+	public int ExcludeOverlappedChildren(bool alsoDeleteIt = false)
 	{
 		List<Transform> safeChildren = new List<Transform>();
 		Transform overlappedParent = GetCreateTransform("[GhostGrid|Overlapped]");
 
 
+		children = GetComponentsInChildren<Transform>();
+		childrenCount = children.Length;
 		int excludedCount = 0;
 
-		children =  GetComponentsInChildren<Transform>();
-		quantity = children.Length;
-
-		for (int i = 0; i < quantity; i++)
+		for (int i = 0; i < childrenCount; i++)
 		{
-			// The first will be the safe forever
+			// The first will be the safe always
 			safeChildren.Add(children[i]);
 
 
-			for (int j = 0; j < quantity; j++)
+			for (int j = 0; j < childrenCount; j++)
 			{
 				// Ignore self
 				if (children[i] == children[j])
 					continue;
 
-
 				// Ignore parents
 				if (children[i] == children[j].parent)
 					continue;
-
 
 				// Overlapped!
 				if (children[i].position == children[j].position)
@@ -160,7 +165,7 @@ public class GhostGrid : MonoBehaviour
 		}
 
 
-		if (alsoDelete)
+		if (alsoDeleteIt)
 			DestroyImmediate(overlappedParent.gameObject);
 
 
@@ -169,15 +174,15 @@ public class GhostGrid : MonoBehaviour
 
 
 	/// <summary>
-	/// Enable all colliders that are borders and disable all colliders that
-	/// are sorrounded by other colliders. Returns the count of disabled
+	/// Enable all 2D colliders that are borders and disable all 2D colliders
+	/// that are sorrounded by other colliders. Returns the count of disabled
 	/// colliders.
 	/// </summary>
 	public int TurnOffUnneededColliders2D()
 	{
-		// Children colliders
+		// Children
 		Collider2D[] colliders = GetComponentsInChildren<Collider2D>();
-		quantity = colliders.Length;
+		childrenCount = colliders.Length;
 
 
 		// Only if there is something in the list
@@ -185,27 +190,25 @@ public class GhostGrid : MonoBehaviour
 			return 0;
 
 
-		// List to collect the unneeded colliders
-		List<Collider2D> unneededColliders = new List<Collider2D>();
-
-
 		// First, reactivate all
-		for (int i = 0; i < quantity; i++)
+		for (int i = 0; i < childrenCount; i++)
 			colliders[i].enabled = true;
 
 
-		// Assuming all colliders have the same size and they are squares
+		// Assuming all colliders are squares and they have the same size
 		float rayLength = colliders[1].bounds.extents.x * 1.1f;
 
+		// Assuming we all have the same layer
+		layer = gameObject.layer;
 
-		// Then, collect the unneeded colliders by checking around them
-		for (int i = 0; i < quantity; i++)
+		// Collect the unneeded colliders by checking around them
+		List<Collider2D> unneededColliders = new List<Collider2D>();
+		for (int i = 0; i < childrenCount; i++)
 		{
-			Vector3 pos = colliders[i].transform.position;
-			int sorroundedCount = 0;
-
-
 			// Test for adjacent colliders ignoring itself
+			int sorroundedCount = 0;
+			Vector3 pos = colliders[i].transform.position;
+
 			colliders[i].enabled = false;
 
 			if (Physics2D.Raycast(pos, Vector2.up, rayLength, layer))
@@ -223,15 +226,15 @@ public class GhostGrid : MonoBehaviour
 			colliders[i].enabled = true;
 
 
-			// Colliders that are completely sorrounded by others
+			// Colliders that are completely sorrounded
 			if (sorroundedCount == 4)
-				unneededColliders.Add(colliders[i]);
+				colliders[i].enabled = false;
 		}
 
 
-		// Turn off chosen colliders
-		foreach (Collider2D c in unneededColliders)
-			c.enabled = false;
+		// Turn off unneeded
+		for (int i = 0; i < unneededColliders.Count; i++)
+			unneededColliders[i].enabled = false;
 
 
 		return unneededColliders.Count;
@@ -239,24 +242,24 @@ public class GhostGrid : MonoBehaviour
 
 
 	/// <summary>
-	/// Rename all children with a particular name and his respective number.
+	/// Rename all children, numerically, correctly padded.
 	/// </summary>
 	public int RenameChildren()
 	{
-
 		children =  GetComponentsInChildren<Transform>();
-		quantity = children.Length;
+		childrenCount = children.Length;
 
 		int count = 0;
+		int leftPad = childrenCount.ToString().Length;
 
-		for (int i = 0; i < quantity; i++)
+		for (int i = 0; i < childrenCount; i++)
 		{
 			// Ignore self
 			if (children[i] == transform)
 				continue;
 
 			// Rename
-			children[i].name = "GG_" + i.ToString().PadLeft(4, '0');
+			children[i].name = i.ToString().PadLeft(leftPad, '0');
 			count += 1;
 		}
 
@@ -264,44 +267,40 @@ public class GhostGrid : MonoBehaviour
 	}
 
 
-	/// <summary>
-	/// Menu item to snap all game objects in the grid for the selected transform.
-	/// Shortcut: ALT + S
-	/// </summary>
-	[MenuItem("Tools/GhostGrid/Snap Grid Once &s")]
+	// ~
+	// MENU ITEMS
+
+	// ~
+	// ALT + S
+	[MenuItem("Tools/GhostGrid/Snap Once &s")]
 	private static void SnapSelectedGrid()
 	{
 		GhostGrid grid = Selection.activeTransform.GetComponentInParent<GhostGrid>();
 
 		if (grid != null)
 		{
-			grid.autoSnapEnabled = false;
+			grid.doAutoSnap = false;
 			grid.SnapAll();
 
-			Debug.Log("GhostGrid :: " + grid.quantity + " elements snapped! Grid auto snap disabled.");
+			Debug.Log("GhostGrid :: Grid snapped!");
 		}
 		else
 		{
-			Debug.Log("GhostGrid :: GhostGrid not found on selected transform (or parents).");
+			Debug.Log(NOT_FOUND);
 		}
 	}
 
-
-	/// <summary>
-	/// Disable the previous menu item if no transform is selected.
-	/// </summary>
-	[MenuItem("Tools/GhostGrid/Snap Grid Once &s", true)]
+	// Disable the previous menu item if no Transform is selected.
+	[MenuItem("Tools/GhostGrid/Snap Once &s", true)]
 	private static bool ValidateSnapSelectedGrid()
 	{
 		return Selection.activeTransform != null;
 	}
 
 
-	/// <summary>
-	/// Menu item to enable auto snap in the grid for the selected transform.
-	/// Shortcut: ALT + A
-	/// </summary>
-	[MenuItem("Tools/GhostGrid/Enable Grid Auto Snap &a")]
+	// ~
+	// ALT + A
+	[MenuItem("Tools/GhostGrid/Enable Auto Snap &a")]
 	private static void EnableGridAutoSnap()
 	{
 		GhostGrid grid = Selection.activeTransform.GetComponentInParent<GhostGrid>();
@@ -309,134 +308,88 @@ public class GhostGrid : MonoBehaviour
 		if (grid != null)
 		{
 			grid.SnapAll();
-			grid.autoSnapEnabled = true;
+			grid.doAutoSnap = true;
 
-			Debug.Log("GhostGrid :: Grid auto snap enabled!");
+			Debug.Log("GhostGrid :: Auto Snap enabled on selected grid!");
 		}
 		else
 		{
-			Debug.Log("GhostGrid :: GhostGrid not found on selected transform (or parents).");
+			Debug.Log(NOT_FOUND);
 		}
 	}
 
-
-	/// <summary>
-	/// Disable the previous menu item if no transform is selected.
-	/// </summary>
-	[MenuItem("Tools/GhostGrid/Enable Grid Auto Snap &a", true)]
+	// Disable the previous menu item if no Transform is selected.
+	[MenuItem("Tools/GhostGrid/Enable Auto Snap &a", true)]
 	private static bool ValidateEnableGridAutoSnap()
 	{
 		return Selection.activeTransform != null;
 	}
 
 
-	/// <summary>
-	/// Menu item to disable all running grids.
-	/// Shortcut: ALT + D
-	/// </summary>
-	[MenuItem("Tools/GhostGrid/Disable Auto Snap In All Grids &d")]
+	// ~
+	// ALT + D
+	[MenuItem("Tools/GhostGrid/Disable Auto Snap On All Grids &d")]
 	private static void DisableAllGrids()
 	{
-		Debug.Log("GhostGrid :: Auto snap disabled for all grids.");
+		Debug.Log("GhostGrid :: Auto Snap disabled on all grids.");
 
 		if (others == null)
 			return;
 
 		for (int i = 0; i < others.Count; i++)
-		{
-			others[i].autoSnapEnabled = false;
-		}
+			others[i].doAutoSnap = false;
 	}
 
 
-	/// <summary>
-	/// Menu item to exclude overlapped children to [GhostGrid:Overlapped].
-	/// </summary>
-	[MenuItem("Tools/GhostGrid/Exclude Overlapped Children")]
-	private static void MenuExcludeOverlappedChildren()
+	// ~
+	// ALT + F
+	[MenuItem("Tools/GhostGrid/Apply Current Optimizations &f")]
+	private static void MenuApplyCurrentOptimizations()
 	{
 		GhostGrid grid = Selection.activeTransform.GetComponentInParent<GhostGrid>();
 
 		if (grid != null)
 		{
-			int howMany = grid.ExcludeOverlappedChildren();
+			int howMany = 0;
+			List<string> messages = new List<string>();
 
-			if (howMany > 0)
+
+			if (grid.doCleanOverlappedChildren)
 			{
-				Debug.Log("GhostGrid :: " + howMany + " overlapped children moved to [GhostGrid:Overlapped] GameObject.");
+				howMany = grid.ExcludeOverlappedChildren(true);
+				messages.Add(howMany + " overlapped deleted");
 			}
-			else
+
+			if (grid.doTurnOffUnneededColliders2D)
 			{
-				Debug.Log("GhostGrid :: The grid is clean! Nothing overlapped.");
+				howMany = grid.TurnOffUnneededColliders2D();
+				messages.Add(howMany + " unneeded 2D colliders were turned off");
 			}
+
+			if (grid.doRename)
+			{
+				howMany = grid.RenameChildren();
+				messages.Add(howMany + " renamed");
+			}
+
+
+			// Messages
+			string message = "";
+			for (int i = 0; i < messages.Count; i++)
+				message += messages[i] + (i + 1 < len ? ", " : ".");
+
+			message = message.Length > 1 ? message : "Nothing to do. Check the current options on the selected GhostGrid.";
+			Debug.Log("GhostGrid :: " + message);
 		}
 		else
 		{
-			Debug.Log("GhostGrid :: GhostGrid not found on selected transform (or parents).");
+			Debug.Log(NOT_FOUND);
 		}
 	}
 
-
-	/// <summary>
-	/// Disable the previous menu item if no transform is selected.
-	/// </summary>
-	[MenuItem("Tools/GhostGrid/Exclude Overlapped Children", true)]
-	private static bool ValidateMenuExcludeOverlappedChildren()
-	{
-		return Selection.activeTransform != null;
-	}
-
-
-	/// <summary>
-	/// Menu item to optimize colliders by turning off the unneeded.
-	/// </summary>
-	[MenuItem("Tools/GhostGrid/Turn Off Unneeded 2D Colliders")]
-	private static void MenuTurnOffUnneededColliders()
-	{
-		GhostGrid grid = Selection.activeTransform.GetComponentInParent<GhostGrid>();
-
-		if (grid != null)
-		{
-			int howMany = grid.TurnOffUnneededColliders2D();
-
-			if (howMany > 0)
-			{
-				Debug.Log("GhostGrid :: " + howMany + " unneeded colliders were turned off!");
-			}
-		}
-		else
-		{
-			Debug.Log("GhostGrid :: GhostGrid not found on selected transform (or parents).");
-		}
-	}
-
-
-	/// <summary>
-	/// Disable the previous menu item if no transform is selected.
-	/// </summary>
-	[MenuItem("Tools/GhostGrid/Turn Off Unneeded 2D Colliders", true)]
-	private static bool ValidateMenuTurnOffUnneededColliders()
-	{
-		return Selection.activeTransform != null;
-	}
-
-
-	/// <summary>
-	/// Menu item that applies all the optimizations.
-	/// </summary>
-	[MenuItem("Tools/GhostGrid/Apply Both Optimizations")]
-	private static void MenuApplyAllOptimizations()
-	{
-		MenuExcludeOverlappedChildren();
-		MenuTurnOffUnneededColliders();
-	}
-
-
-	/// <summary>
-	/// Disable the previous menu item if no transform is selected.
-	/// </summary>
-	[MenuItem("Tools/GhostGrid/Apply Both Optimizations", true)]
-	private static bool ValidateMenuApplyAllOptimizations()
+	// Disable the previous menu item if no Transform is selected.
+	[MenuItem("Tools/GhostGrid/Apply Current Optimizations &f", true)]
+	private static bool ValidateMenuApplyCurrentOptimizations()
 	{
 		return Selection.activeTransform != null;
 	}

@@ -8,17 +8,12 @@ using UnityEngine;
 public class GhostGridEditor : Editor
 {
     private GhostGrid grid;
-    private string message;
-
-    private bool doRename = false;
-    private bool doCleanOverlappedChildren = false;
-    private bool doTurnOffUnneededColliders2D = false;
+    private string message = "";
 
 
     public void OnEnable()
     {
         grid = target as GhostGrid;
-        message = "";
     }
 
 
@@ -27,19 +22,23 @@ public class GhostGridEditor : Editor
         GUILayout.Label("");
         DrawDefaultInspector();
 
-        GUILayout.Label("");
-        GUILayout.Label("Snapping");
-        GUILayout.BeginHorizontal();
 
+        // Snapping
+        GUILayout.Label("");
+        EditorGUILayout.LabelField("Snapping", EditorStyles.boldLabel);
+        GUILayout.Label(
+            (grid.doAutoSnap ? "Auto Snap is ON" : "Auto Snap is off") +
+            (grid.childrenCount > 1 ? " / " + (grid.childrenCount - 1) + " children" : ""));
+        GUILayout.BeginHorizontal();
 
         // Snap Once
         if (GUILayout.Button("Snap Once", GUILayout.ExpandWidth(false)))
         {
             message = "Grid snapped!";
 
-            if (grid.autoSnapEnabled)
+            if (grid.doAutoSnap)
             {
-                grid.autoSnapEnabled = false;
+                grid.doAutoSnap = false;
             }
             else
             {
@@ -48,13 +47,11 @@ public class GhostGridEditor : Editor
         }
 
         // Auto Snap
-        if (GUILayout.Button(grid.autoSnapEnabled ? "Disable Auto Snap" : "Enable Auto Snap", GUILayout.ExpandWidth(false)))
+        if (GUILayout.Button(grid.doAutoSnap ? "Disable Auto Snap" : "Enable Auto Snap", GUILayout.ExpandWidth(false)))
         {
-            message = "Done!";
+            grid.doAutoSnap = !grid.doAutoSnap;
 
-            grid.autoSnapEnabled = !grid.autoSnapEnabled;
-
-            if (grid.autoSnapEnabled)
+            if (grid.doAutoSnap)
                 grid.SnapAll();
         }
         GUILayout.EndHorizontal();
@@ -62,48 +59,51 @@ public class GhostGridEditor : Editor
 
         // Optimizations
         GUILayout.Label("");
-        GUILayout.Label("Optimizations");
+        EditorGUILayout.LabelField("Optimizations", EditorStyles.boldLabel);
 
-
-        // ^
         // Toogle set
-
         GUILayout.BeginHorizontal();
-        doRename = GUILayout.Toggle(doRename, "Rename children");
+        grid.doCleanOverlappedChildren = GUILayout.Toggle(grid.doCleanOverlappedChildren, "Delete overlapped");
         GUILayout.EndHorizontal();
 
         GUILayout.BeginHorizontal();
-        doCleanOverlappedChildren = GUILayout.Toggle(doCleanOverlappedChildren, "Delete overlapped");
+        grid.doTurnOffUnneededColliders2D = GUILayout.Toggle(grid.doTurnOffUnneededColliders2D, "Turn off unneeded 2D colliders (not borders)");
         GUILayout.EndHorizontal();
 
         GUILayout.BeginHorizontal();
-        doTurnOffUnneededColliders2D = GUILayout.Toggle(doTurnOffUnneededColliders2D, "Turn off unneeded 2D colliders on layer");
+        grid.doRename = GUILayout.Toggle(grid.doRename, "Rename children");
         GUILayout.EndHorizontal();
 
-        GUILayout.BeginHorizontal();
-        if (GUILayout.Button("Apply", GUILayout.ExpandWidth(false)))
+        // Apply!
+        if (grid.doCleanOverlappedChildren || grid.doTurnOffUnneededColliders2D || grid.doRename)
         {
-            if (doRename)
-                message = grid.RenameChildren() + " children renamed!";
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("Apply Now", GUILayout.ExpandWidth(false)))
+            {
+                message = "On " + (grid.childrenCount - 1) + " children:\n";
 
-            if (doCleanOverlappedChildren)
-                message = grid.ExcludeOverlappedChildren() + " overlapped children deleted!";
+                if (grid.doCleanOverlappedChildren)
+                    message += "+ " + grid.ExcludeOverlappedChildren(true) + " overlapped deleted\n";
 
-            if (doTurnOffUnneededColliders2D)
-                message = grid.TurnOffUnneededColliders2D() + " unneeded colliders were turned off!";
+                if (grid.doTurnOffUnneededColliders2D)
+                    message += "+ " + grid.TurnOffUnneededColliders2D() + " unneeded 2D colliders were turned off\n";
+
+                // Rename should be last
+                if (grid.doRename)
+                    message += "+ " + grid.RenameChildren() + " renamed\n";
+            }
+            GUILayout.EndHorizontal();
         }
-        GUILayout.EndHorizontal();
 
 
-        // Status label
+        // Message
         GUILayout.Label("");
-        GUILayout.Label(grid.autoSnapEnabled ? "Auto Snap Running!" : "Auto Snap Disabled.");
-        if (message.Length > 0) GUILayout.Label(message);
+        if (message.Length > 0)
+            GUILayout.Label(message.Trim());
 
 
         // Credits
-        GUILayout.Label("");
-        GUILayout.Label("GhostGrid v0.1.3.7a by @matnesis");
+        GUILayout.Label("\nGhostGrid v0.1.3.8 by @matnesis");
     }
 }
 #endif
