@@ -376,7 +376,7 @@ public class GhostGrid : MonoBehaviour
 			// Messages
 			string message = "";
 			for (int i = 0; i < messages.Count; i++)
-				message += messages[i] + (i + 1 < len ? ", " : ".");
+				message += messages[i] + (i + 1 < messages.Count ? ", " : ".");
 
 			message = message.Length > 1 ? message : "Nothing to do. Check the current options on the selected GhostGrid.";
 			Debug.Log("GhostGrid :: " + message);
