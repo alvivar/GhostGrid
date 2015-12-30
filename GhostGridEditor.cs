@@ -71,7 +71,7 @@ public class GhostGridEditor : Editor
         GUILayout.EndHorizontal();
 
         GUILayout.BeginHorizontal();
-        grid.doRename = GUILayout.Toggle(grid.doRename, "Rename children");
+        grid.doRename = GUILayout.Toggle(grid.doRename, "Rename children (1..n)");
         GUILayout.EndHorizontal();
 
         // Apply!
