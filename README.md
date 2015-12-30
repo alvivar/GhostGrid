@@ -1,5 +1,5 @@
 ###GhostGrid v0.1.3.8
-<br /><br />
+<br />
 
 Lightweight grid component with auto snapping & additional magic. Just add
 'GhostGrid.cs' to any GameObject to activate the grid for him and his
