@@ -23,7 +23,10 @@ public class GhostGrid : MonoBehaviour
 	[Header("Config")]
 	public float gridSize = 1f;
 
+
+	// ~
 	// Data shared with the editor script
+
 	[HideInInspector]
 	public int childrenCount = 0;
 	[HideInInspector]
@@ -34,6 +37,9 @@ public class GhostGrid : MonoBehaviour
 	public bool doCleanOverlappedChildren = false;
 	[HideInInspector]
 	public bool doTurnOffUnneededColliders2D = false;
+	[HideInInspector]
+	public bool doExtrusionMode = false;
+
 
 	private LayerMask layer;
 	private Transform[] children = null;
@@ -342,7 +348,7 @@ public class GhostGrid : MonoBehaviour
 
 
 	// ~
-	// ALT + F
+	// Optimizations (ALT + F)
 	[MenuItem("Tools/GhostGrid/Apply Current Optimizations &f")]
 	private static void MenuApplyCurrentOptimizations()
 	{
@@ -390,6 +396,36 @@ public class GhostGrid : MonoBehaviour
 	// Disable the previous menu item if no Transform is selected.
 	[MenuItem("Tools/GhostGrid/Apply Current Optimizations &f", true)]
 	private static bool ValidateMenuApplyCurrentOptimizations()
+	{
+		return Selection.activeTransform != null;
+	}
+
+
+	// ~
+	// Extrusion Mode (ALT + E)
+	[MenuItem("Tools/GhostGrid/Enter Extrusion Mode &e")]
+	private static void MenuEnterExtrusionMode()
+	{
+		GhostGrid grid = Selection.activeTransform.GetComponentInParent<GhostGrid>();
+
+		if (grid != null)
+		{
+			grid.doExtrusionMode = !grid.doExtrusionMode;
+
+			if (grid.doExtrusionMode)
+				Selection.activeGameObject = grid.gameObject;
+
+			Debug.Log("GhostGrid :: Extrusion mode " + (grid.doExtrusionMode ? "enabled!" : "disabled."));
+		}
+		else
+		{
+			Debug.Log(NOT_FOUND);
+		}
+	}
+
+	// Disable the previous menu item if no Transform is selected.
+	[MenuItem("Tools/GhostGrid/Enter Extrusion Mode &e", true)]
+	private static bool ValidateMenuEnterExtrusionMode()
 	{
 		return Selection.activeTransform != null;
 	}

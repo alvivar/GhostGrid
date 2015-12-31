@@ -17,6 +17,42 @@ public class GhostGridEditor : Editor
     }
 
 
+    public void OnSceneGUI()
+    {
+        if (grid.doExtrusionMode)
+        {
+            HandleUtility.AddDefaultControl(GUIUtility.GetControlID(FocusType.Passive));
+
+            if (Selection.activeGameObject != grid.gameObject)
+                grid.doExtrusionMode = false;
+        }
+
+
+        // if (grid.doExtrusionMode)
+        // {
+        //     // Retrieve the control Id
+        //     int controlId = GUIUtility.GetControlID(FocusType.Passive);
+
+        //     // Start treating your events
+        //     switch (Event.current.type)
+        //     {
+        //         case EventType.MouseDown:
+
+        //             // Treat your event
+        //             Debug.Log("Mouse down " + Time.time);
+
+        //             // Tell the UI your event is the main one to use, it override the selection in  the scene view
+        //             GUIUtility.hotControl = controlId;
+
+        //             // Don't forget to use the event
+        //             Event.current.Use();
+
+        //             break;
+        //     }
+        // }
+    }
+
+
     public override void OnInspectorGUI()
     {
         GUILayout.Label("");
