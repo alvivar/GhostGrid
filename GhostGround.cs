@@ -165,15 +165,36 @@ public class GhostGround : MonoBehaviour
 	/// </summary>
 	public void Grow(Transform element, Vector3 direction)
 	{
-		// Direction meaning
-		List<Transform> toGrow = new List<Transform>();
+		// Refresh
+		CollectElements();
 
-		if (direction.x > 0) toGrow = xSideUp;
-		else if (direction.x < 0) toGrow = xSideDown;
-		else if (direction.y > 0) toGrow = ySideUp;
-		else if (direction.y < 0) toGrow = ySideDown;
-		else if (direction.z > 0) toGrow = zSideUp;
-		else if (direction.z < 0) toGrow = zSideDown;
+
+		// Direction meaning
+		// List<Transform> toGrow = new List<Transform>();
+		List<Transform> toGrow = groundElements;
+
+		// if (direction.x > 0) toGrow = xSideUp;
+		// else if (direction.x < 0) toGrow = xSideDown;
+		// else if (direction.y > 0) toGrow = ySideUp;
+		// else if (direction.y < 0) toGrow = ySideDown;
+		// else if (direction.z > 0) toGrow = zSideUp;
+		// else if (direction.z < 0) toGrow = zSideDown;
+
+		// if (direction.x != 0)
+		// {
+		// 	toGrow.AddRange(xSideUp);
+		// 	toGrow.AddRange(xSideDown);
+		// }
+		// else if (direction.y != 0)
+		// {
+		// 	toGrow.AddRange(ySideUp);
+		// 	toGrow.AddRange(ySideDown);
+		// }
+		// else if (direction.z != 0)
+		// {
+		// 	toGrow.AddRange(zSideUp);
+		// 	toGrow.AddRange(zSideDown);
+		// }
 
 
 		// Grow
@@ -182,8 +203,11 @@ public class GhostGround : MonoBehaviour
 			if (toGrow[i] == null)
 				continue;
 
+			Vector3 currentPosition = toGrow[i].position;
+			Vector3 growPosition = currentPosition + direction * gridSize;
+
 			// Grow at direction
-			Vector3 newPosition = GhostGrid.GetSnapVector(toGrow[i].position + direction * gridSize, gridSize);
+			Vector3 newPosition = GhostGrid.GetSnapVector(growPosition, gridSize);
 			PutElement(element, newPosition);
 
 			// Also as virtual ground
@@ -202,8 +226,13 @@ public class GhostGround : MonoBehaviour
 	/// </summary>
 	public void Reduce(Vector3 direction)
 	{
+		// Refresh
+		CollectElements();
+
+
 		// Direction meaning
 		List<Transform> toReduce = new List<Transform>();
+		// List<Transform> toReduce = groundElements;
 
 		if (direction.x > 0) toReduce = xSideUp;
 		else if (direction.x < 0) toReduce = xSideDown;
@@ -213,7 +242,25 @@ public class GhostGround : MonoBehaviour
 		else if (direction.z < 0) toReduce = zSideDown;
 
 
+		// if (direction.x != 0)
+		// {
+		// 	toReduce.AddRange(xSideUp);
+		// 	toReduce.AddRange(xSideDown);
+		// }
+		// else if (direction.y != 0)
+		// {
+		// 	toReduce.AddRange(ySideUp);
+		// 	toReduce.AddRange(ySideDown);
+		// }
+		// else if (direction.z != 0)
+		// {
+		// 	toReduce.AddRange(zSideUp);
+		// 	toReduce.AddRange(zSideDown);
+		// }
+
+
 		// Reduce
+		List<GameObject> toDestroy = new List<GameObject>();
 		for (int i = 0; i < toReduce.Count; i++)
 		{
 			if (toReduce[i] == null)
@@ -223,23 +270,24 @@ public class GhostGround : MonoBehaviour
 			Collider[] colliders = Physics.OverlapSphere(toReduce[i].position, 0.1f, layer);
 			for (int j = 0; j < colliders.Length; j++)
 			{
-				Vector3 currentPosition = GhostGrid.GetSnapVector(colliders[0].transform.position, gridSize);
+				Vector3 currentPosition = colliders[0].transform.position;
 
 				// Remove current
-				groundPositions.Remove(currentPosition);
+				// groundPositions.Remove(currentPosition);
 
 				// Add the position behind the removed to allow extrusion
 				Vector3 behind = GhostGrid.GetSnapVector(currentPosition + -1 * direction * gridSize, gridSize);
 				if (!groundPositions.Contains(behind))
 					groundPositions.Add(behind);
 
-				// Delete
-				Destroy(colliders[0].gameObject);
+				// To delete
+				toDestroy.Add(colliders[0].gameObject);
 			}
 		}
 
 
-		// Refresh
-		CollectElements();
+		// Destroy at the end
+		for (int i = 0; i < toDestroy.Count; i++)
+			Destroy(toDestroy[i]);
 	}
 }
