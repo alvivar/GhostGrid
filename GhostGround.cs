@@ -15,6 +15,7 @@ public class GhostGround : MonoBehaviour
 	[Header("Config")]
 	public float gridSize = 1;
 	public LayerMask layer;
+	public float OverlapSphereRatio = 0.001f;
 
 	[Header("Data")]
 	[SerializeField] private List<Vector3> groundPositions;
@@ -64,7 +65,7 @@ public class GhostGround : MonoBehaviour
 		for (int i = 0; i < groundPositions.Count; i++)
 		{
 			// There is something there?
-			Collider[] colliders = Physics.OverlapSphere(groundPositions[i], 0.1f, layer);
+			Collider[] colliders = Physics.OverlapSphere(groundPositions[i], OverlapSphereRatio, layer);
 			for (int j = 0; j < colliders.Length; j++)
 			{
 				if (!groundElements.Contains(colliders[0].transform))
@@ -129,7 +130,7 @@ public class GhostGround : MonoBehaviour
 	/// </summary>
 	public void PutElement(Transform element, Vector3 position)
 	{
-		Collider[] colliders = Physics.OverlapSphere(position, 0.1f, layer);
+		Collider[] colliders = Physics.OverlapSphere(position, OverlapSphereRatio, layer);
 		if (colliders.Length < 1)
 			Instantiate(element, position, Quaternion.identity);
 	}
@@ -143,7 +144,7 @@ public class GhostGround : MonoBehaviour
 		for (int i = 0; i < groundPositions.Count; i++)
 		{
 			// There is something there?
-			Collider[] colliders = Physics.OverlapSphere(groundPositions[i], 0.1f, layer);
+			Collider[] colliders = Physics.OverlapSphere(groundPositions[i], OverlapSphereRatio, layer);
 			for (int j = 0; j < colliders.Length; j++)
 				Destroy(colliders[0].gameObject);
 		}
@@ -173,6 +174,7 @@ public class GhostGround : MonoBehaviour
 		// List<Transform> toGrow = new List<Transform>();
 		List<Transform> toGrow = groundElements;
 
+		// Option 1
 		// if (direction.x > 0) toGrow = xSideUp;
 		// else if (direction.x < 0) toGrow = xSideDown;
 		// else if (direction.y > 0) toGrow = ySideUp;
@@ -180,6 +182,7 @@ public class GhostGround : MonoBehaviour
 		// else if (direction.z > 0) toGrow = zSideUp;
 		// else if (direction.z < 0) toGrow = zSideDown;
 
+		// Option 2
 		// if (direction.x != 0)
 		// {
 		// 	toGrow.AddRange(xSideUp);
@@ -214,10 +217,6 @@ public class GhostGround : MonoBehaviour
 			if (!groundPositions.Contains(newPosition))
 				groundPositions.Add(newPosition);
 		}
-
-
-		// Refresh
-		CollectElements();
 	}
 
 
@@ -234,6 +233,7 @@ public class GhostGround : MonoBehaviour
 		List<Transform> toReduce = new List<Transform>();
 		// List<Transform> toReduce = groundElements;
 
+		// Option 1
 		if (direction.x > 0) toReduce = xSideUp;
 		else if (direction.x < 0) toReduce = xSideDown;
 		else if (direction.y > 0) toReduce = ySideUp;
@@ -241,7 +241,7 @@ public class GhostGround : MonoBehaviour
 		else if (direction.z > 0) toReduce = zSideUp;
 		else if (direction.z < 0) toReduce = zSideDown;
 
-
+		// Option 2
 		// if (direction.x != 0)
 		// {
 		// 	toReduce.AddRange(xSideUp);
@@ -267,7 +267,7 @@ public class GhostGround : MonoBehaviour
 				continue;
 
 			// There is something there?
-			Collider[] colliders = Physics.OverlapSphere(toReduce[i].position, 0.1f, layer);
+			Collider[] colliders = Physics.OverlapSphere(toReduce[i].position, OverlapSphereRatio, layer);
 			for (int j = 0; j < colliders.Length; j++)
 			{
 				Vector3 currentPosition = colliders[0].transform.position;
