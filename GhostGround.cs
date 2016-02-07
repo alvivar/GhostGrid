@@ -18,15 +18,15 @@ public class GhostGround : MonoBehaviour
 	public float OverlapSphereRatio = 0.001f;
 
 	[Header("Data")]
-	[SerializeField] private List<Vector3> groundPositions;
-	[SerializeField] private List<Transform> groundElements;
-	[SerializeField] private List<Transform> corners;
-	[SerializeField] private List<Transform> xSideUp;
-	[SerializeField] private List<Transform> xSideDown;
-	[SerializeField] private List<Transform> ySideUp;
-	[SerializeField] private List<Transform> ySideDown;
-	[SerializeField] private List<Transform> zSideUp;
-	[SerializeField] private List<Transform> zSideDown;
+	public List<Vector3> groundPositions;
+	public List<Transform> groundElements;
+	public List<Transform> corners;
+	public List<Transform> xSideUp;
+	public List<Transform> xSideDown;
+	public List<Transform> ySideUp;
+	public List<Transform> ySideDown;
+	public List<Transform> zSideUp;
+	public List<Transform> zSideDown;
 
 
 	private static GhostGround instance;
@@ -166,10 +166,6 @@ public class GhostGround : MonoBehaviour
 	/// </summary>
 	public void Grow(Transform element, Vector3 direction)
 	{
-		// Refresh
-		CollectElements();
-
-
 		// Direction meaning
 		// List<Transform> toGrow = new List<Transform>();
 		List<Transform> toGrow = groundElements;
@@ -221,14 +217,10 @@ public class GhostGround : MonoBehaviour
 
 
 	/// <summary>
-	/// Reduces the virtual grid by eliminating one layer of elements at the direction.
+	/// Reduces the virtual ground by eliminating one layer of elements at the direction.
 	/// </summary>
 	public void Reduce(Vector3 direction)
 	{
-		// Refresh
-		CollectElements();
-
-
 		// Direction meaning
 		List<Transform> toReduce = new List<Transform>();
 		// List<Transform> toReduce = groundElements;
@@ -272,9 +264,6 @@ public class GhostGround : MonoBehaviour
 			{
 				Vector3 currentPosition = colliders[0].transform.position;
 
-				// Remove current
-				// groundPositions.Remove(currentPosition);
-
 				// Add the position behind the removed to allow extrusion
 				Vector3 behind = GhostGrid.GetSnapVector(currentPosition + -1 * direction * gridSize, gridSize);
 				if (!groundPositions.Contains(behind))
@@ -289,5 +278,21 @@ public class GhostGround : MonoBehaviour
 		// Destroy at the end
 		for (int i = 0; i < toDestroy.Count; i++)
 			Destroy(toDestroy[i]);
+	}
+
+
+	/// <summary>
+	/// Change the material in all ground elements.
+	/// </summary>
+	public void SetMaterial(Material material)
+	{
+		if (groundElements == null)
+			return;
+
+		for (int i = 0; i < groundElements.Count; i++)
+		{
+			if (groundElements[i] != null)
+				groundElements[i].GetComponent<Renderer>().material = material;
+		}
 	}
 }
