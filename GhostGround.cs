@@ -1,18 +1,19 @@
 ﻿
-// Experimental dynamic GameObject boxel ground over a GhostGrid.
+// Experimental dynamic GameObject boxel ground over a GhostGrid (Wat!)
 
-// Andrés Villalobos ~> @matnesis ~> andresalvivar@gmail.com
+// Andrés Villalobos ~ @matnesis ~ andresalvivar@gmail.com
 // 2016/01/03 09:10 PM
 
 
 using System.Collections.Generic;
 using System.Linq;
+using System;
 using UnityEngine;
 
 
 public class GhostGround : MonoBehaviour
 {
-	[Header("Config")]
+	[Header("Grid config")]
 	public float gridSize = 1;
 	public LayerMask layer;
 	public float OverlapSphereRatio = 0.001f;
@@ -29,6 +30,7 @@ public class GhostGround : MonoBehaviour
 	public List<Transform> zSideDown;
 
 
+	// Singleton
 	private static GhostGround instance;
 	public static GhostGround g
 	{
@@ -49,7 +51,7 @@ public class GhostGround : MonoBehaviour
 	}
 
 
-	public void Setup(List<Vector3> groundPositions, float gridSize, LayerMask layer)
+	public void SetupGrid(List<Vector3> groundPositions, float gridSize, LayerMask layer)
 	{
 		this.groundPositions = groundPositions;
 		this.gridSize = gridSize;
@@ -118,7 +120,7 @@ public class GhostGround : MonoBehaviour
 	/// <summary>
 	/// Adds a position to the virtual ground.
 	/// </summary>
-	public void AddPosition(Vector3 position)
+	public void AddGroundPosition(Vector3 position)
 	{
 		if (!groundPositions.Contains(position))
 			groundPositions.Add(position);
@@ -126,27 +128,54 @@ public class GhostGround : MonoBehaviour
 
 
 	/// <summary>
-	/// Creates an element in the position.
+	/// Creates an element through a delegate.
 	/// </summary>
-	public void PutElement(Transform element, Vector3 position)
+	private void InstantiateElement(Vector3 position, Func<Transform> onInstantiate)
 	{
+		if (onInstantiate == null)
+		{
+			Debug.Log("GhostGrid :: onInstantiate is required!", this);
+			return;
+		}
+
+
 		Collider[] colliders = Physics.OverlapSphere(position, OverlapSphereRatio, layer);
 		if (colliders.Length < 1)
-			Instantiate(element, position, Quaternion.identity);
+		{
+			Transform t = onInstantiate();
+			t.position = position;
+			t.SetParent(transform);
+		}
+	}
+
+
+	/// <summary>
+	/// Destroy an element through a delegate.
+	/// </summary>
+	private void DestroyElement(Transform element, Action<Transform> onDestroy)
+	{
+		if (onDestroy == null)
+		{
+			Debug.Log("GhostGrid :: onDestroy delegate is required!", this);
+			return;
+		}
+
+
+		onDestroy(element);
 	}
 
 
 	/// <summary>
 	/// Destroy all elements detected on the virtual ground.
 	/// </summary>
-	public void DestroyAllElements()
+	public void DestroyAllElements(Action<Transform> onDestroy)
 	{
 		for (int i = 0; i < groundPositions.Count; i++)
 		{
 			// There is something there?
 			Collider[] colliders = Physics.OverlapSphere(groundPositions[i], OverlapSphereRatio, layer);
 			for (int j = 0; j < colliders.Length; j++)
-				Destroy(colliders[0].gameObject);
+				DestroyElement(colliders[0].transform, onDestroy);
 		}
 	}
 
@@ -154,17 +183,17 @@ public class GhostGround : MonoBehaviour
 	/// <summary>
 	/// Fills with elements all the virtual ground.
 	/// </summary>
-	public void Fill(Transform element)
+	public void Fill(Func<Transform> onInstantiate)
 	{
 		for (int i = 0; i < groundPositions.Count; i++)
-			PutElement(element, GhostGrid.GetSnapVector(groundPositions[i], gridSize));
+			InstantiateElement(GhostGrid.GetSnapVector(groundPositions[i], gridSize), onInstantiate);
 	}
 
 
 	/// <summary>
 	/// Grows the virtual grid by creating one layer of elements at the direction.
 	/// </summary>
-	public void Grow(Transform element, Vector3 direction)
+	public void Grow(Vector3 direction, Func<Transform> onInstantiate)
 	{
 		// Direction meaning
 		// List<Transform> toGrow = new List<Transform>();
@@ -207,7 +236,7 @@ public class GhostGround : MonoBehaviour
 
 			// Grow at direction
 			Vector3 newPosition = GhostGrid.GetSnapVector(growPosition, gridSize);
-			PutElement(element, newPosition);
+			InstantiateElement(newPosition, onInstantiate);
 
 			// Also as virtual ground
 			if (!groundPositions.Contains(newPosition))
@@ -219,7 +248,7 @@ public class GhostGround : MonoBehaviour
 	/// <summary>
 	/// Reduces the virtual ground by eliminating one layer of elements at the direction.
 	/// </summary>
-	public void Reduce(Vector3 direction)
+	public void Reduce(Vector3 direction, Action<Transform> onDestroy)
 	{
 		// Direction meaning
 		List<Transform> toReduce = new List<Transform>();
@@ -277,7 +306,7 @@ public class GhostGround : MonoBehaviour
 
 		// Destroy at the end
 		for (int i = 0; i < toDestroy.Count; i++)
-			Destroy(toDestroy[i]);
+			DestroyElement(toDestroy[i].transform, onDestroy);
 	}
 
 
