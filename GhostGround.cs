@@ -1,5 +1,5 @@
 ﻿
-// Experimental dynamic GameObject boxel ground over a GhostGrid (Wat!)
+// Experimental dynamic GameObject boxel ground over a GhostGrid (Uh!)
 
 // Andrés Villalobos ~ @matnesis ~ andresalvivar@gmail.com
 // 2016/01/03 09:10 PM
@@ -22,6 +22,8 @@ public class GhostGround : MonoBehaviour
 	public List<Vector3> groundPositions;
 	public List<Transform> groundElements;
 	public List<Transform> corners;
+
+	[Header("Sides")]
 	public List<Transform> xSideUp;
 	public List<Transform> xSideDown;
 	public List<Transform> ySideUp;
@@ -30,7 +32,6 @@ public class GhostGround : MonoBehaviour
 	public List<Transform> zSideDown;
 
 
-	// Singleton
 	private static GhostGround instance;
 	public static GhostGround g
 	{
@@ -130,15 +131,14 @@ public class GhostGround : MonoBehaviour
 	/// <summary>
 	/// Creates an element through a delegate.
 	/// </summary>
-	private void InstantiateElement(Vector3 position, Func<Transform> onInstantiate)
+	private void InstantiateElement(Vector3 position, Func<Transform> onInstantiate, bool validateOverlap = true)
 	{
 		if (onInstantiate == null)
-		{
-			Debug.Log("GhostGrid :: onInstantiate is required!", this);
 			return;
-		}
 
 
+		// if (validateOverlap)
+		// {
 		Collider[] colliders = Physics.OverlapSphere(position, OverlapSphereRatio, layer);
 		if (colliders.Length < 1)
 		{
@@ -146,6 +146,13 @@ public class GhostGround : MonoBehaviour
 			t.position = position;
 			t.SetParent(transform);
 		}
+		// }
+		// else
+		// {
+		// 	Transform t = onInstantiate();
+		// 	t.position = position;
+		// 	t.SetParent(transform);
+		// }
 	}
 
 
@@ -154,14 +161,8 @@ public class GhostGround : MonoBehaviour
 	/// </summary>
 	private void DestroyElement(Transform element, Action<Transform> onDestroy)
 	{
-		if (onDestroy == null)
-		{
-			Debug.Log("GhostGrid :: onDestroy delegate is required!", this);
-			return;
-		}
-
-
-		onDestroy(element);
+		if (onDestroy != null)
+			onDestroy(element);
 	}
 
 
@@ -195,37 +196,9 @@ public class GhostGround : MonoBehaviour
 	/// </summary>
 	public void Grow(Vector3 direction, Func<Transform> onInstantiate)
 	{
-		// Direction meaning
-		// List<Transform> toGrow = new List<Transform>();
+		// Extract the positions that can grow
 		List<Transform> toGrow = groundElements;
-
-		// Option 1
-		// if (direction.x > 0) toGrow = xSideUp;
-		// else if (direction.x < 0) toGrow = xSideDown;
-		// else if (direction.y > 0) toGrow = ySideUp;
-		// else if (direction.y < 0) toGrow = ySideDown;
-		// else if (direction.z > 0) toGrow = zSideUp;
-		// else if (direction.z < 0) toGrow = zSideDown;
-
-		// Option 2
-		// if (direction.x != 0)
-		// {
-		// 	toGrow.AddRange(xSideUp);
-		// 	toGrow.AddRange(xSideDown);
-		// }
-		// else if (direction.y != 0)
-		// {
-		// 	toGrow.AddRange(ySideUp);
-		// 	toGrow.AddRange(ySideDown);
-		// }
-		// else if (direction.z != 0)
-		// {
-		// 	toGrow.AddRange(zSideUp);
-		// 	toGrow.AddRange(zSideDown);
-		// }
-
-
-		// Grow
+		var canBeGrown = new List<Vector3>();
 		for (int i = 0; i < toGrow.Count; i++)
 		{
 			if (toGrow[i] == null)
@@ -236,12 +209,58 @@ public class GhostGround : MonoBehaviour
 
 			// Grow at direction
 			Vector3 newPosition = GhostGrid.GetSnapVector(growPosition, gridSize);
-			InstantiateElement(newPosition, onInstantiate);
 
-			// Also as virtual ground
+			// Extract if there is nothing there
+			Collider[] colliders = Physics.OverlapSphere(newPosition, OverlapSphereRatio, layer);
+			if (colliders.Length < 1)
+				canBeGrown.Add(newPosition);
+
+			// Add them as virtual ground
 			if (!groundPositions.Contains(newPosition))
 				groundPositions.Add(newPosition);
 		}
+
+
+		// Required
+		if (canBeGrown.Count < 1)
+			return;
+
+		// Filter the lower bottom
+		if (direction.x > 0)
+		{
+			float xMin = canBeGrown.Aggregate((agg, next) => agg.x < next.x ? agg : next).x;
+			canBeGrown = canBeGrown.Where(x => x.x == xMin).ToList();
+		}
+		else if (direction.x < 0)
+		{
+			float xMax = canBeGrown.Aggregate((agg, next) => agg.x > next.x ? agg : next).x;
+			canBeGrown = canBeGrown.Where(x => x.x == xMax).ToList();
+		}
+		else if (direction.y > 0)
+		{
+			float yMin = canBeGrown.Aggregate((agg, next) => agg.y < next.y ? agg : next).y;
+			canBeGrown = canBeGrown.Where(x => x.y == yMin).ToList();
+		}
+		else if (direction.y < 0)
+		{
+			float yMax = canBeGrown.Aggregate((agg, next) => agg.y > next.y ? agg : next).y;
+			canBeGrown = canBeGrown.Where(x => x.y == yMax).ToList();
+		}
+		else if (direction.z > 0)
+		{
+			float zMin = canBeGrown.Aggregate((agg, next) => agg.z < next.z ? agg : next).z;
+			canBeGrown = canBeGrown.Where(x => x.z == zMin).ToList();
+		}
+		else if (direction.z < 0)
+		{
+			float zMax = canBeGrown.Aggregate((agg, next) => agg.z > next.z ? agg : next).z;
+			canBeGrown = canBeGrown.Where(x => x.z == zMax).ToList();
+		}
+
+
+		// Grow them
+		for (int i = 0; i < canBeGrown.Count; i++)
+			InstantiateElement(canBeGrown[i], onInstantiate);
 	}
 
 
