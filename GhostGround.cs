@@ -131,7 +131,7 @@ public class GhostGround : MonoBehaviour
 	/// <summary>
 	/// Creates an element through a delegate.
 	/// </summary>
-	private void InstantiateElement(Vector3 position, Func<Transform> onInstantiate, bool validateOverlap = true)
+	private void InstantiateElement(Vector3 position, Func<Transform> onInstantiate)//, bool validateOverlap = true)
 	{
 		if (onInstantiate == null)
 			return;
@@ -280,23 +280,6 @@ public class GhostGround : MonoBehaviour
 		else if (direction.y < 0) toReduce = ySideDown;
 		else if (direction.z > 0) toReduce = zSideUp;
 		else if (direction.z < 0) toReduce = zSideDown;
-
-		// Option 2
-		// if (direction.x != 0)
-		// {
-		// 	toReduce.AddRange(xSideUp);
-		// 	toReduce.AddRange(xSideDown);
-		// }
-		// else if (direction.y != 0)
-		// {
-		// 	toReduce.AddRange(ySideUp);
-		// 	toReduce.AddRange(ySideDown);
-		// }
-		// else if (direction.z != 0)
-		// {
-		// 	toReduce.AddRange(zSideUp);
-		// 	toReduce.AddRange(zSideDown);
-		// }
 
 
 		// Reduce
