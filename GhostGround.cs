@@ -181,13 +181,23 @@ public class GhostGround : MonoBehaviour
 	}
 
 
+	public static Vector3 GetSnapVector(Vector3 vector, float gridSize)
+	{
+		vector.x = Mathf.Round(vector.x / gridSize) * gridSize;
+		vector.y = Mathf.Round(vector.y / gridSize) * gridSize;
+		vector.z = Mathf.Round(vector.z / gridSize) * gridSize;
+
+		return vector;
+	}
+
+
 	/// <summary>
 	/// Fills with elements all the virtual ground.
 	/// </summary>
 	public void Fill(Func<Transform> onInstantiate)
 	{
 		for (int i = 0; i < groundPositions.Count; i++)
-			InstantiateElement(GhostGrid.GetSnapVector(groundPositions[i], gridSize), onInstantiate);
+			InstantiateElement(GetSnapVector(groundPositions[i], gridSize), onInstantiate);
 	}
 
 
@@ -208,7 +218,7 @@ public class GhostGround : MonoBehaviour
 			Vector3 growPosition = currentPosition + direction * gridSize;
 
 			// Grow at direction
-			Vector3 newPosition = GhostGrid.GetSnapVector(growPosition, gridSize);
+			Vector3 newPosition = GetSnapVector(growPosition, gridSize);
 
 			// Extract if there is nothing there
 			Collider[] colliders = Physics.OverlapSphere(newPosition, OverlapSphereRatio, layer);
@@ -296,7 +306,7 @@ public class GhostGround : MonoBehaviour
 				Vector3 currentPosition = colliders[0].transform.position;
 
 				// Add the position behind the removed to allow extrusion
-				Vector3 behind = GhostGrid.GetSnapVector(currentPosition + -1 * direction * gridSize, gridSize);
+				Vector3 behind = GetSnapVector(currentPosition + -1 * direction * gridSize, gridSize);
 				if (!groundPositions.Contains(behind))
 					groundPositions.Add(behind);
 
