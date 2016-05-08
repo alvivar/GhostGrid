@@ -11,11 +11,12 @@
 // 07/01/2015 3:21 am
 
 
-#if UNITY_EDITOR
 using UnityEngine;
-using UnityEditor;
 using System.Collections.Generic;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 [ExecuteInEditMode]
 public class GhostGrid : MonoBehaviour
@@ -48,6 +49,7 @@ public class GhostGrid : MonoBehaviour
     private const string NOT_FOUND = "GhostGrid :: GhostGrid not found on selected GameObject (or parents).";
 
 
+#if UNITY_EDITOR
     void Update()
     {
         if (!doAutoSnap)
@@ -430,5 +432,5 @@ public class GhostGrid : MonoBehaviour
     {
         return Selection.activeTransform != null;
     }
-}
 #endif
+}
