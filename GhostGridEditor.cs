@@ -107,6 +107,10 @@ public class GhostGridEditor : Editor
         GUILayout.EndHorizontal();
 
         GUILayout.BeginHorizontal();
+        grid.doTurnOffRenderers = GUILayout.Toggle(grid.doTurnOffRenderers, "Turn off Renderers");
+        GUILayout.EndHorizontal();
+
+        GUILayout.BeginHorizontal();
         grid.doRename = GUILayout.Toggle(grid.doRename, "Rename children (1..n)");
         GUILayout.EndHorizontal();
 
@@ -123,6 +127,9 @@ public class GhostGridEditor : Editor
 
                 if (grid.doTurnOffUnneededColliders2D)
                     message += "+ " + grid.TurnOffUnneededColliders2D() + " unneeded 2D colliders were turned off\n";
+
+                if (grid.doTurnOffRenderers)
+                    message += "+ " + grid.TurnOffRenderers() + " Renderers were turned off\n";
 
                 // Rename should be last
                 if (grid.doRename)

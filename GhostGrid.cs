@@ -12,7 +12,17 @@
 
 
 // #todo
-// - Fails with just one element
+// + Select all between selected
+// + Fails with just one element
+// + Extract GhostGrid magical core
+// + Extract optimizations as a plugin
+// + Hide other GhostGrids temporaly
+// + Create a mesh from all
+// + Pick prefab to clone
+// + Paint selected prefab
+
+// #done
+// x Select brothers around
 
 
 using UnityEngine;
@@ -44,6 +54,8 @@ public class GhostGrid : MonoBehaviour
     [HideInInspector]
     public bool doTurnOffUnneededColliders2D = false;
     [HideInInspector]
+    public bool doTurnOffRenderers = false;
+    [HideInInspector]
     public bool doExtrusionMode = false;
 
 
@@ -51,6 +63,33 @@ public class GhostGrid : MonoBehaviour
     private static List<GhostGrid> others = null;
 
     private const string NOT_FOUND = "GhostGrid :: GhostGrid not found on selected GameObject (or parents).";
+
+
+    /// <summary>
+    /// Returns the snap position for the current vector on a simulated virtual grid.
+    /// </summary>
+    public static Vector3 GetSnapVector(Vector3 vector, float gridSize)
+    {
+        return new Vector3(
+            Mathf.Round(vector.x / gridSize) * gridSize,
+            Mathf.Round(vector.y / gridSize) * gridSize,
+            Mathf.Round(vector.z / gridSize) * gridSize
+        );
+    }
+
+
+    /// <summary>
+    /// Returns the Transform with the name.
+    /// </summary>
+    public static Transform GetOrCreateTransform(string name)
+    {
+        GameObject go = GameObject.Find(name);
+
+        if (go == null)
+            go = new GameObject(name);
+
+        return go.transform;
+    }
 
 
 #if UNITY_EDITOR
@@ -91,33 +130,6 @@ public class GhostGrid : MonoBehaviour
 
 
     /// <summary>
-    /// Returns the snap position for the current vector on a simulated virtual grid.
-    /// </summary>
-    public static Vector3 GetSnapVector(Vector3 vector, float gridSize)
-    {
-        vector.x = Mathf.Round(vector.x / gridSize) * gridSize;
-        vector.y = Mathf.Round(vector.y / gridSize) * gridSize;
-        vector.z = Mathf.Round(vector.z / gridSize) * gridSize;
-
-        return vector;
-    }
-
-
-    /// <summary>
-    /// Returns the Transform with the name.
-    /// </summary>
-    public static Transform GetCreateTransform(string name)
-    {
-        GameObject go = GameObject.Find(name);
-
-        if (go == null)
-            go = new GameObject(name);
-
-        return go.transform;
-    }
-
-
-    /// <summary>
     /// Snap all children to the grid.
     /// </summary>
     public void SnapAll()
@@ -140,7 +152,7 @@ public class GhostGrid : MonoBehaviour
     public int ExcludeOverlappedChildren(bool alsoDeleteIt = false)
     {
         List<Transform> safeChildren = new List<Transform>();
-        Transform overlappedParent = GetCreateTransform("[GhostGrid|Overlapped]");
+        Transform overlappedParent = GetOrCreateTransform("[GhostGrid|Overlapped]");
 
 
         children = GetComponentsInChildren<Transform>();
@@ -251,6 +263,27 @@ public class GhostGrid : MonoBehaviour
 
 
         return unneededColliders.Count;
+    }
+
+
+    public int TurnOffRenderers()
+    {
+        // Children
+        Renderer[] renders = GetComponentsInChildren<Renderer>();
+        childrenCount = renders.Length;
+
+
+        // Only if there is something in the list
+        if (renders.Length < 1)
+            return 0;
+
+
+        // Deactivate all
+        for (int i = 0; i < childrenCount; i++)
+            renders[i].enabled = true;
+
+
+        return childrenCount;
     }
 
 
